@@ -8,13 +8,6 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('academic_years', function (Blueprint $table) {
-            $table->id();
-            $table->string('year');
-            $table->boolean('is_active')->default(false);
-            $table->timestamps();
-        });
-
         Schema::create('majors', function (Blueprint $table) {
             $table->id();
             $table->string('name');
@@ -35,7 +28,6 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->string('major');
-            $table->foreignId('academic_year_id')->constrained()->cascadeOnDelete();
             $table->timestamps();
         });
 
@@ -81,7 +73,6 @@ return new class extends Migration
             $table->id();
             $table->foreignId('teacher_id')->constrained()->cascadeOnDelete();
             $table->foreignId('class_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('academic_year_id')->constrained()->cascadeOnDelete();
             $table->timestamps();
         });
 
@@ -89,7 +80,6 @@ return new class extends Migration
             $table->id();
             $table->foreignId('teacher_id')->constrained()->cascadeOnDelete();
             $table->foreignId('major_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('academic_year_id')->constrained()->cascadeOnDelete();
             $table->timestamps();
         });
 
@@ -183,6 +173,5 @@ return new class extends Migration
         Schema::dropIfExists('classes');
         Schema::dropIfExists('subjects');
         Schema::dropIfExists('majors');
-        Schema::dropIfExists('academic_years');
     }
 };
