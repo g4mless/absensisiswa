@@ -30,7 +30,6 @@
                     <tr>
                         <th>Nama</th>
                         <th>Jurusan</th>
-                        <th>Tahun Ajaran</th>
                         <th>Wali Kelas</th>
                         <th>Aksi</th>
                     </tr>
@@ -42,7 +41,6 @@
                             <td>
                                 <x-badge variant="info">{{ $class->major ?? '-' }}</x-badge>
                             </td>
-                            <td>{{ $class->academicYear->year ?? '-' }}</td>
                             <td>
                                 <div class="flex items-center gap-2">
                                     <a href="{{ route('admin.classes.edit', $class) }}">
@@ -58,7 +56,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="5">
+                            <td colspan="4">
                                 <x-empty-state title="Tidak ada kelas ditemukan" description="Mulai dengan menambahkan kelas baru." />
                             </td>
                         </tr>

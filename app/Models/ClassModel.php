@@ -10,12 +10,7 @@ class ClassModel extends Model
     use HasFactory;
 
     protected $table = 'classes';
-    protected $fillable = ['name', 'major', 'academic_year_id'];
-
-    public function academicYear()
-    {
-        return $this->belongsTo(AcademicYear::class);
-    }
+    protected $fillable = ['name', 'major'];
 
     public function students()
     {

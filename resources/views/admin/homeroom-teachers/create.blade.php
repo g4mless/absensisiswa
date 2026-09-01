@@ -17,7 +17,6 @@
             <div class="space-y-4">
                 <x-select label="Guru" name="teacher_id" :options="$teachers->pluck('name', 'id')->toArray()" placeholder="Pilih Guru" :error="$errors->first('teacher_id')" value="{{ old('teacher_id') }}" />
                 <x-select label="Kelas" name="class_id" :options="$classes->pluck('name', 'id')->toArray()" placeholder="Pilih Kelas" :error="$errors->first('class_id')" value="{{ old('class_id') }}" />
-                <x-select label="Tahun Akademik" name="academic_year_id" :options="$academicYears->pluck('year', 'id')->toArray()" placeholder="Pilih Tahun Akademik" :error="$errors->first('academic_year_id')" value="{{ old('academic_year_id') }}" />
             </div>
             <div class="flex items-center gap-3 mt-6">
                 <x-button variant="primary" type="submit">Buat Penugasan</x-button>

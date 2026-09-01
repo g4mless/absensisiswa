@@ -6,7 +6,6 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\AdminStudentController;
 use App\Http\Controllers\AdminTeacherController;
 use App\Http\Controllers\ClassController;
-use App\Http\Controllers\AcademicYearController;
 use App\Http\Controllers\SubjectController;
 use App\Http\Controllers\TeacherSubjectController;
 use App\Http\Controllers\ProgramHeadController;
@@ -33,7 +32,6 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
     Route::resource('students', AdminStudentController::class);
     Route::resource('teachers', AdminTeacherController::class);
     Route::resource('classes', ClassController::class);
-    Route::resource('academic-years', AcademicYearController::class);
     Route::resource('subjects', SubjectController::class);
     Route::resource('teacher-subjects', TeacherSubjectController::class)->only(['index', 'create', 'store', 'destroy']);
     Route::resource('program-heads', ProgramHeadController::class)->only(['index', 'create', 'store', 'destroy']);

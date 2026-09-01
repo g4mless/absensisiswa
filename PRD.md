@@ -436,7 +436,6 @@ users
 students
 teachers
 
-academic_years
 majors
 classes
 

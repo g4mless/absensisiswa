@@ -30,7 +30,6 @@
                     <tr>
                         <th>Guru</th>
                         <th>Kelas</th>
-                        <th>Tahun Akademik</th>
                         <th>Aksi</th>
                     </tr>
                 </thead>
@@ -41,7 +40,6 @@
                             <td>
                                 <x-badge variant="info">{{ $assignment->class->name ?? '-' }}</x-badge>
                             </td>
-                            <td>{{ $assignment->academicYear->year ?? '-' }}</td>
                             <td>
                                 <div class="flex items-center gap-2">
                                     <form action="{{ route('admin.homeroom-teachers.destroy', $assignment) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin?')">
@@ -54,7 +52,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="4">
+                            <td colspan="3">
                                 <x-empty-state title="Tidak ada penugasan ditemukan" description="Mulai dengan menugaskan wali kelas." />
                             </td>
                         </tr>

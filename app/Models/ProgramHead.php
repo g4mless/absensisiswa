@@ -9,7 +9,7 @@ class ProgramHead extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['teacher_id', 'major_id', 'academic_year_id'];
+    protected $fillable = ['teacher_id', 'major_id'];
 
     public function teacher()
     {
@@ -21,8 +21,4 @@ class ProgramHead extends Model
         return $this->belongsTo(Major::class);
     }
 
-    public function academicYear()
-    {
-        return $this->belongsTo(AcademicYear::class);
-    }
 }

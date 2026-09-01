@@ -9,7 +9,7 @@ class HomeroomTeacher extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['teacher_id', 'class_id', 'academic_year_id'];
+    protected $fillable = ['teacher_id', 'class_id'];
 
     public function teacher()
     {
@@ -19,11 +19,6 @@ class HomeroomTeacher extends Model
     public function class()
     {
         return $this->belongsTo(ClassModel::class);
-    }
-
-    public function academicYear()
-    {
-        return $this->belongsTo(AcademicYear::class);
     }
 
     public function getNameAttribute()

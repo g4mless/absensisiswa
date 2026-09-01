@@ -17,7 +17,6 @@
             <div class="space-y-4">
                 <x-input label="Nama Kelas" name="name" :error="$errors->first('name')" value="{{ old('name') }}" placeholder="contoh: XII RPL 1" />
                 <x-input label="Jurusan" name="major" :error="$errors->first('major')" value="{{ old('major') }}" placeholder="contoh: RPL" />
-                <x-select label="Tahun Ajaran" name="academic_year_id" :options="$academicYears->pluck('year', 'id')->toArray()" placeholder="Pilih Tahun Ajaran" :error="$errors->first('academic_year_id')" value="{{ old('academic_year_id', optional($academicYears->firstWhere('is_active', true))->id) }}" />
             </div>
             <div class="flex items-center gap-3 mt-6">
                 <x-button variant="primary" type="submit">Buat Kelas</x-button>
