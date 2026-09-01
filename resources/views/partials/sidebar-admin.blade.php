@@ -92,6 +92,11 @@
                 <span>Lokasi Sekolah</span>
             </a>
 
+            <a href="{{ route('admin.attendance-setting.index') }}" class="{{ request()->routeIs('admin.attendance-setting.*') ? 'md-sidebar-link-active' : 'md-sidebar-link' }}">
+                <svg class="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/></svg>
+                <span>Waktu Absensi</span>
+            </a>
+
             <a href="{{ route('admin.attendance.index') }}" class="{{ request()->routeIs('admin.attendance.*') ? 'md-sidebar-link-active' : 'md-sidebar-link' }}">
                 <svg class="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/></svg>
                 <span>Absensi</span>

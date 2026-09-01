@@ -60,7 +60,7 @@
                             </svg>
                         </div>
                         <h3 class="mt-4 text-lg font-semibold text-gray-900">Check In</h3>
-                        <p class="mt-1 text-sm text-gray-500">Tekan tombol di bawah untuk melakukan absensi</p>
+                         <p class="mt-1 text-sm text-gray-500">Absensi dibuka pukul {{ substr($attendanceSetting->start_time, 0, 5) }} sampai {{ substr($attendanceSetting->end_time, 0, 5) }}</p>
                     </div>
 
                     @if($errors->any())

@@ -38,7 +38,7 @@
                                     <td>{{ $record->student->name ?? '-' }}</td>
                                     <td>{{ $record->student->class->name ?? '-' }}</td>
                                     <td>
-                                        <x-badge variant="{{ $record->status === 'present' ? 'success' : ($record->status === 'late' ? 'warning' : 'danger') }}">
+                                        <x-badge variant="{{ $record->status === 'hadir' ? 'success' : ($record->status === 'terlambat' ? 'warning' : 'danger') }}">
                                             {{ ucfirst($record->status) }}
                                         </x-badge>
                                     </td>

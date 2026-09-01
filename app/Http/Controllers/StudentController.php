@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\DailyAttendance;
+use App\Models\AttendanceSetting;
 use App\Models\SchoolLocation;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Hash;
@@ -12,9 +13,17 @@ class StudentController extends Controller
 {
     public function dashboard()
     {
-        $upcomingSchedule = collect();
-        $recentAttendance = collect();
-        return view('student.dashboard', compact('upcomingSchedule', 'recentAttendance'));
+        $student = auth()->user()->student;
+        $attendances = DailyAttendance::where('student_id', $student?->id);
+        $todayAttendance = (clone $attendances)->whereDate('date', today())->first();
+        $recentAttendance = (clone $attendances)->orderByDesc('date')->limit(5)->get();
+        $weekAttendance = (clone $attendances)->whereBetween('date', [now()->startOfWeek(), now()->endOfWeek()])->count();
+        $monthAttendance = (clone $attendances)->whereBetween('date', [now()->startOfMonth(), now()->endOfMonth()])->count();
+        $totalAttendance = (clone $attendances)->count();
+
+        return view('student.dashboard', compact(
+            'todayAttendance', 'recentAttendance', 'weekAttendance', 'monthAttendance', 'totalAttendance'
+        ));
     }
 
     public function attendance()
@@ -23,8 +32,12 @@ class StudentController extends Controller
         $todayAttendance = $student
             ? DailyAttendance::where('student_id', $student->id)->whereDate('date', today())->first()
             : null;
+        $attendanceSetting = AttendanceSetting::first() ?? new AttendanceSetting([
+            'start_time' => '06:00:00',
+            'end_time' => '07:30:00',
+        ]);
 
-        return view('student.attendance.index', compact('todayAttendance'));
+        return view('student.attendance.index', compact('todayAttendance', 'attendanceSetting'));
     }
 
     public function history()
@@ -61,10 +74,13 @@ class StudentController extends Controller
         }
 
         $now = now();
-        $start = Carbon::today()->setTime(6, 0);
-        $end = Carbon::today()->setTime(7, 30);
+        $setting = AttendanceSetting::first();
+        $start = Carbon::today()->setTimeFromTimeString($setting?->start_time ?? '06:00:00');
+        $end = Carbon::today()->setTimeFromTimeString($setting?->end_time ?? '07:30:00');
         if (!$now->between($start, $end)) {
-            return response()->json(['message' => 'Absensi hanya dibuka pukul 06:00 sampai 07:30.'], 422);
+            return response()->json([
+                'message' => 'Absensi hanya dibuka pukul ' . $start->format('H:i') . ' sampai ' . $end->format('H:i') . '.',
+            ], 422);
         }
 
         $location = SchoolLocation::first();

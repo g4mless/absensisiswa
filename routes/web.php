@@ -13,6 +13,7 @@ use App\Http\Controllers\PklSupervisorController;
 use App\Http\Controllers\ScheduleController;
 use App\Http\Controllers\SchoolLocationController;
 use App\Http\Controllers\AdminAttendanceController;
+use App\Http\Controllers\AttendanceSettingController;
 use App\Http\Controllers\AdminReportController;
 use App\Http\Controllers\TeacherController;
 use App\Http\Controllers\StudentController;
@@ -40,6 +41,8 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
 
     Route::get('/school-location', [SchoolLocationController::class, 'index'])->name('school-location.index');
     Route::put('/school-location', [SchoolLocationController::class, 'update'])->name('school-location.update');
+    Route::get('/attendance-setting', [AttendanceSettingController::class, 'index'])->name('attendance-setting.index');
+    Route::put('/attendance-setting', [AttendanceSettingController::class, 'update'])->name('attendance-setting.update');
 
     Route::get('/attendance', [AdminAttendanceController::class, 'index'])->name('attendance.index');
     Route::get('/reports', [AdminReportController::class, 'index'])->name('reports.index');

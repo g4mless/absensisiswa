@@ -43,7 +43,7 @@
                             <td>{{ $record->student->class->name ?? '-' }}</td>
                             <td>{{ \Carbon\Carbon::parse($record->date)->format('d M Y') }}</td>
                             <td>
-                                <x-badge variant="{{ $record->status === 'present' ? 'success' : ($record->status === 'late' ? 'warning' : 'danger') }}">
+                                <x-badge variant="{{ $record->status === 'hadir' ? 'success' : ($record->status === 'terlambat' ? 'warning' : 'danger') }}">
                                     {{ ucfirst($record->status) }}
                                 </x-badge>
                             </td>
