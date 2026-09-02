@@ -20,7 +20,6 @@
                     <x-input label="Nama Lengkap" name="name" :error="$errors->first('name')" value="{{ old('name') }}" />
                 </div>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <x-input label="Email" name="email" type="email" :error="$errors->first('email')" value="{{ old('email') }}" />
                     <x-input label="Telepon" name="phone" :error="$errors->first('phone')" value="{{ old('phone') }}" />
                 </div>
                 <div>

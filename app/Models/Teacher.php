@@ -38,8 +38,4 @@ class Teacher extends Model
         return $this->user->name ?? '-';
     }
 
-    public function getEmailAttribute()
-    {
-        return $this->user->email ?? '-';
-    }
 }

@@ -36,8 +36,6 @@
                         <span class="text-sm font-medium text-gray-900">{{ $student->class->name ?? '-' }}</span>
                     </div>
                     <div class="flex justify-between border-b border-gray-100 py-2">
-                        <span class="text-sm text-gray-500">Email</span>
-                        <span class="text-sm font-medium text-gray-900">{{ $student->user->email ?? '-' }}</span>
                     </div>
                     <div class="flex justify-between py-2">
                         <span class="text-sm text-gray-500">Telepon</span>

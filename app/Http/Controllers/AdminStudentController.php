@@ -2,12 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\StudentExport;
+use App\Imports\StudentMultiSheetImport;
 use App\Models\ClassModel;
 use App\Models\Student;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
+use Maatwebsite\Excel\Facades\Excel;
 
 class AdminStudentController extends Controller
 {
@@ -32,7 +35,8 @@ class AdminStudentController extends Controller
             'nis' => ['required', 'string', 'unique:students,nis'],
             'name' => ['required', 'string'],
             'class_id' => ['required', 'exists:classes,id'],
-            'email' => ['nullable', 'email', 'unique:users,email'],
+            'phone' => ['nullable', 'string', 'max:30'],
+            'address' => ['nullable', 'string', 'max:500'],
             'is_pkl' => ['nullable', 'boolean'],
         ]);
 
@@ -40,7 +44,6 @@ class AdminStudentController extends Controller
             $user = User::create([
                 'name' => $data['name'],
                 'username' => $data['name'].'-'.$data['nis'],
-                'email' => $data['email'] ?? $data['nis'].'@student.local',
                 'role' => ! empty($data['is_pkl']) ? 'siswa_pkl' : 'siswa',
                 'password' => $data['nis'],
             ]);
@@ -49,6 +52,8 @@ class AdminStudentController extends Controller
                 'user_id' => $user->id,
                 'nis' => $data['nis'],
                 'class_id' => $data['class_id'],
+                'phone' => $data['phone'] ?? null,
+                'address' => $data['address'] ?? null,
                 'is_pkl' => ! empty($data['is_pkl']),
             ]);
         });
@@ -79,18 +84,19 @@ class AdminStudentController extends Controller
             'nis' => ['required', 'string', Rule::unique('students', 'nis')->ignore($student->id)],
             'name' => ['required', 'string', 'max:255'],
             'class_id' => ['required', 'exists:classes,id'],
-            'email' => ['nullable', 'email', Rule::unique('users', 'email')->ignore($student->user_id)],
+            'phone' => ['nullable', 'string', 'max:30'],
+            'address' => ['nullable', 'string', 'max:500'],
             'is_pkl' => ['nullable', 'boolean'],
         ]);
         DB::transaction(function () use ($student, $data, $request) {
             $isPkl = $request->boolean('is_pkl');
             $student->user->update([
                 'name' => $data['name'],
-                'email' => $data['email'] ?? $student->user->email,
                 'role' => $isPkl ? 'siswa_pkl' : 'siswa',
             ]);
             $student->update([
                 'nis' => $data['nis'], 'class_id' => $data['class_id'],
+                'phone' => $data['phone'] ?? null, 'address' => $data['address'] ?? null,
                 'is_pkl' => $isPkl,
             ]);
         });
@@ -102,5 +108,22 @@ class AdminStudentController extends Controller
         $student = Student::with('user')->findOrFail($id);
         DB::transaction(fn () => $student->user->delete());
         return redirect()->route('admin.students.index');
+    }
+
+    public function import(Request $request)
+    {
+        $request->validate([
+            'file' => ['required', 'file', 'mimes:xlsx,xls,csv'],
+        ]);
+
+        Excel::import(new StudentMultiSheetImport, $request->file('file'));
+
+        return redirect()->route('admin.students.index')
+            ->with('status', 'Data siswa berhasil diimpor.');
+    }
+
+    public function export()
+    {
+        return Excel::download(new StudentExport, 'data_siswa.xlsx');
     }
 }

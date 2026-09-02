@@ -2,12 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\TeacherExport;
+use App\Imports\TeacherImport;
 use App\Models\Teacher;
 use App\Models\Subject;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
+use Maatwebsite\Excel\Facades\Excel;
 
 class AdminTeacherController extends Controller
 {
@@ -27,14 +30,12 @@ class AdminTeacherController extends Controller
         $data = $request->validate([
             'nip' => ['required', 'string', 'max:255', 'unique:teachers,nip'],
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['nullable', 'email', 'max:255', 'unique:users,email'],
         ]);
 
         DB::transaction(function () use ($data) {
             $user = \App\Models\User::create([
                 'name' => $data['name'],
                 'username' => $data['nip'],
-                'email' => $data['email'] ?? $data['nip'].'@teacher.local',
                 'role' => 'guru',
                 'password' => Hash::make($data['nip']),
             ]);
@@ -68,12 +69,10 @@ class AdminTeacherController extends Controller
         $data = $request->validate([
             'nip' => ['required', 'string', 'max:255', Rule::unique('teachers', 'nip')->ignore($teacher->id)],
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['nullable', 'email', 'max:255', Rule::unique('users', 'email')->ignore($teacher->user_id)],
         ]);
         DB::transaction(function () use ($teacher, $data, $request) {
             $teacher->user->update([
                 'name' => $data['name'],
-                'email' => $data['email'] ?? $teacher->user->email,
             ]);
             $teacher->update(['nip' => $data['nip']]);
         });
@@ -85,5 +84,22 @@ class AdminTeacherController extends Controller
         $teacher = Teacher::with('user')->findOrFail($id);
         DB::transaction(fn () => $teacher->user->delete());
         return redirect()->route('admin.teachers.index');
+    }
+
+    public function import(Request $request)
+    {
+        $request->validate([
+            'file' => ['required', 'file', 'mimes:xlsx,xls,csv'],
+        ]);
+
+        Excel::import(new TeacherImport, $request->file('file'));
+
+        return redirect()->route('admin.teachers.index')
+            ->with('status', 'Data guru berhasil diimpor.');
+    }
+
+    public function export()
+    {
+        return Excel::download(new TeacherExport, 'data_guru.xlsx');
     }
 }

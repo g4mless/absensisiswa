@@ -14,6 +14,7 @@
         'secondary' => 'md-btn-secondary',
         'danger' => 'md-btn-danger',
         'success' => 'md-btn-success',
+        'warning' => 'md-btn-warning',
         'ghost' => 'md-btn-ghost',
         default => 'md-btn-primary',
     };

@@ -9,7 +9,7 @@ class Student extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['user_id', 'nis', 'class_id', 'is_pkl'];
+    protected $fillable = ['user_id', 'nis', 'class_id', 'phone', 'address', 'is_pkl'];
 
     protected function casts(): array
     {
@@ -41,8 +41,4 @@ class Student extends Model
         return $this->user->name ?? '-';
     }
 
-    public function getEmailAttribute()
-    {
-        return $this->user->email ?? '-';
-    }
 }

@@ -21,10 +21,7 @@
                     <x-input label="Nama Lengkap" name="name" :error="$errors->first('name')" value="{{ old('name', $student->name) }}" />
                 </div>
                 <x-select label="Kelas" name="class_id" :options="$classes->pluck('name', 'id')->toArray()" placeholder="Pilih Kelas" :error="$errors->first('class_id')" value="{{ old('class_id', $student->class_id) }}" />
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <x-input label="Email" name="email" type="email" :error="$errors->first('email')" value="{{ old('email', $student->email) }}" />
-                    <x-input label="Telepon" name="phone" :error="$errors->first('phone')" value="{{ old('phone', $student->phone) }}" />
-                </div>
+                <x-input label="Telepon" name="phone" type="tel" :error="$errors->first('phone')" value="{{ old('phone', $student->phone) }}" />
                 <x-input label="Alamat" name="address" :error="$errors->first('address')" value="{{ old('address', $student->address) }}" />
                 <div class="flex items-center gap-4">
                     <div class="flex items-center gap-2">

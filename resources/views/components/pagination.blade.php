@@ -2,6 +2,8 @@
     'paginator',
 ])
 
+@php($elements = \Illuminate\Pagination\UrlWindow::make($paginator))
+
 @if($paginator->hasPages())
     <nav class="flex items-center justify-between" role="navigation" aria-label="Pagination Navigation">
         <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">

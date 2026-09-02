@@ -32,10 +32,6 @@
                             <span class="text-sm font-medium text-gray-900">{{ $student->nis ?? '-' }}</span>
                         </div>
                         <div class="flex justify-between border-b border-gray-100 py-2">
-                            <span class="text-sm text-gray-500">Email</span>
-                            <span class="text-sm font-medium text-gray-900">{{ $student->user->email ?? '-' }}</span>
-                        </div>
-                        <div class="flex justify-between border-b border-gray-100 py-2">
                             <span class="text-sm text-gray-500">Telepon</span>
                             <span class="text-sm font-medium text-gray-900">{{ $student->phone ?? '-' }}</span>
                         </div>
@@ -72,7 +68,6 @@
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <x-input label="Nama Lengkap" name="name" :value="old('name', $student->user->name ?? '')" required />
-                        <x-input label="Email" name="email" type="email" :value="old('email', $student->user->email ?? '')" required />
                     </div>
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">

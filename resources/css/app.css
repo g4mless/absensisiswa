@@ -206,6 +206,32 @@
     cursor: not-allowed;
 }
 
+.md-btn-warning {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    border-radius: 0.5rem;
+    padding: 0.625rem 1rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    transition: all 150ms;
+    outline: none;
+    cursor: pointer;
+    background-color: #f59f00;
+    color: white;
+}
+.md-btn-warning:hover {
+    background-color: #e67700;
+}
+.md-btn-warning:focus {
+    box-shadow: 0 0 0 2px white, 0 0 0 4px #f59f00;
+}
+.md-btn-warning:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
 .md-btn-ghost {
     display: inline-flex;
     align-items: center;

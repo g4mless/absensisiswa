@@ -48,7 +48,6 @@
                                     </div>
                                     <div>
                                         <p class="font-medium">{{ $user->name }}</p>
-                                        <p class="text-sm text-gray-500">{{ $user->email }}</p>
                                     </div>
                                 </div>
                             </td>
@@ -95,7 +94,6 @@
         <div class="space-y-4">
             <x-input label="Nama Lengkap" name="name" :error="$errors->first('name')" value="{{ old('name') }}" />
             <x-input label="Username" name="username" :error="$errors->first('username')" value="{{ old('username') }}" />
-            <x-input label="Email" name="email" type="email" :error="$errors->first('email')" value="{{ old('email') }}" />
             <x-input label="Password" name="password" type="password" :error="$errors->first('password')" />
             <x-select label="Peran" name="role" :options="['admin' => 'Admin', 'teacher' => 'Guru', 'student' => 'Siswa']" placeholder="Pilih Peran" :error="$errors->first('role')" />
         </div>

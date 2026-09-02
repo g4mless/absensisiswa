@@ -8,7 +8,15 @@
 ])
 
 <div
-    x-data="{ isDragging: false, fileName: '' }"
+    x-data="{
+        isDragging: false,
+        fileName: '',
+        setFiles(files) {
+            if (!files.length) return;
+            $refs.input.files = files;
+            this.fileName = files[0].name;
+        }
+    }"
     class="space-y-1.5"
 >
     @if($label)
@@ -18,16 +26,18 @@
     <div
         x-on:dragover.prevent="isDragging = true"
         x-on:dragleave.prevent="isDragging = false"
-        x-on:drop.prevent="isDragging = false; fileName = $event.dataTransfer.files[0].name"
+        x-on:drop.prevent="isDragging = false; setFiles($event.dataTransfer.files)"
         :class="isDragging ? 'border-primary-500 bg-primary-50' : 'border-gray-300 bg-gray-50'"
         class="relative flex flex-col items-center justify-center rounded-xl border-2 border-dashed p-6 transition-colors cursor-pointer hover:border-primary-400 hover:bg-primary-50/50"
     >
         <input
             type="file"
+            x-ref="input"
             name="{{ $name }}"
             {{ $multiple ? 'multiple' : '' }}
             @if($accept) accept="{{ $accept }}" @endif
             class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+            x-on:change="fileName = $event.target.files[0]?.name ?? ''"
             {{ $attributes }}
         />
 

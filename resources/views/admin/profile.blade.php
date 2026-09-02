@@ -18,7 +18,6 @@
             <div class="space-y-4">
                 <x-input label="Nama" name="name" value="{{ auth()->user()->name }}" required />
                 <x-input label="Username" name="username" value="{{ auth()->user()->username }}" disabled />
-                <x-input label="Email" name="email" type="email" value="{{ auth()->user()->email }}" />
                 <x-input label="Role" name="role" value="{{ auth()->user()->role }}" disabled />
             </div>
             <div class="mt-6">

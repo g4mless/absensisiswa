@@ -31,7 +31,22 @@ class AuthController extends Controller
         ], $request->boolean('remember'))) {
             $request->session()->regenerate();
 
-            return $this->redirectByRole(Auth::user());
+            $user = Auth::user();
+            if (! str_starts_with($user->password, '$2y$')) {
+                $user->update(['password' => Hash::make($user->password)]);
+            }
+
+            return $this->redirectByRole($user);
+        }
+
+        // Fallback: cek plaintext password (untuk data impor belum di-hash)
+        $user = User::where('username', $credentials['username'])->first();
+        if ($user && ! str_starts_with($user->password, '$2y$') && $credentials['password'] === $user->password) {
+            Auth::login($user, $request->boolean('remember'));
+            $request->session()->regenerate();
+            $user->update(['password' => Hash::make($user->password)]);
+
+            return $this->redirectByRole($user);
         }
 
         // Siswa masuk menggunakan nama lengkap dan NIS sebagai password.
@@ -40,11 +55,21 @@ class AuthController extends Controller
             ->whereRaw('LOWER(name) = ?', [mb_strtolower(trim($credentials['username']))])
             ->first();
 
-        if ($student && Hash::check($credentials['password'], $student->password)) {
-            Auth::login($student, $request->boolean('remember'));
-            $request->session()->regenerate();
+        if ($student) {
+            $passwordMatch = str_starts_with($student->password, '$2y$')
+                ? Hash::check($credentials['password'], $student->password)
+                : $credentials['password'] === $student->password;
 
-            return $this->redirectByRole($student);
+            if ($passwordMatch) {
+                Auth::login($student, $request->boolean('remember'));
+                $request->session()->regenerate();
+
+                if (! str_starts_with($student->password, '$2y$')) {
+                    $student->update(['password' => Hash::make($student->password)]);
+                }
+
+                return $this->redirectByRole($student);
+            }
         }
 
         return back()->withErrors([

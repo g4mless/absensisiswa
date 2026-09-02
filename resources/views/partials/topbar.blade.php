@@ -59,7 +59,6 @@
         >
             <div class="border-b border-gray-100 px-4 py-3">
                 <p class="text-sm font-medium text-gray-900">{{ Auth::user()->name ?? 'User' }}</p>
-                <p class="text-xs text-gray-500">{{ Auth::user()->email ?? '' }}</p>
             </div>
             @php
                 $profileRoute = match(auth()->user()->role ?? '') {

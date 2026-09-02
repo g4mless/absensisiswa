@@ -121,12 +121,12 @@ class StudentController extends Controller
     {
         $data = $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'email', 'max:255'],
             'phone' => ['nullable', 'string', 'max:30'],
             'address' => ['nullable', 'string', 'max:500'],
         ]);
 
-        auth()->user()->update(collect($data)->only(['name', 'email'])->all());
+        auth()->user()->update(['name' => $data['name']]);
+        auth()->user()->student()->update(collect($data)->only(['phone', 'address'])->all());
         return redirect()->route('student.profile');
     }
 

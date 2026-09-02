@@ -31,7 +31,12 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
 
     Route::resource('users', UserController::class);
     Route::resource('students', AdminStudentController::class);
+    Route::post('students/import', [AdminStudentController::class, 'import'])->name('students.import');
+    Route::get('students/export', [AdminStudentController::class, 'export'])->name('students.export');
+
     Route::resource('teachers', AdminTeacherController::class);
+    Route::post('teachers/import', [AdminTeacherController::class, 'import'])->name('teachers.import');
+    Route::get('teachers/export', [AdminTeacherController::class, 'export'])->name('teachers.export');
     Route::resource('classes', ClassController::class);
     Route::resource('subjects', SubjectController::class);
     Route::resource('teacher-subjects', TeacherSubjectController::class)->only(['index', 'create', 'store', 'destroy']);
