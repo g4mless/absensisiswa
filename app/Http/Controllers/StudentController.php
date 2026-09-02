@@ -2,12 +2,13 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\DailyAttendance;
+use App\Models\AcademicCalendar;
 use App\Models\AttendanceSetting;
+use App\Models\DailyAttendance;
 use App\Models\SchoolLocation;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 
 class StudentController extends Controller
 {
@@ -36,8 +37,23 @@ class StudentController extends Controller
             'start_time' => '06:00:00',
             'end_time' => '07:30:00',
         ]);
+        $today = now();
+        $calendar = AcademicCalendar::with('holidays')
+            ->whereDate('month', $today->copy()->startOfMonth())
+            ->first();
+        $attendanceAvailable = $calendar
+            && $today->isWeekday()
+            && ! $calendar->isHoliday($today)
+            && ! $calendar->isLocked($today);
+        $attendanceMessage = ! $calendar
+            ? 'Kalender akademik bulan ini belum diperbarui.'
+            : (! $today->isWeekday()
+                ? 'Absensi hanya dibuka pada hari Senin sampai Jumat.'
+                : ($calendar->isHoliday($today)
+                    ? 'Hari ini merupakan hari libur akademik.'
+                    : ($calendar->isLocked($today) ? 'Absensi bulan ini sudah ditutup permanen.' : null)));
 
-        return view('student.attendance.index', compact('todayAttendance', 'attendanceSetting'));
+        return view('student.attendance.index', compact('todayAttendance', 'attendanceSetting', 'attendanceAvailable', 'attendanceMessage'));
     }
 
     public function history()
@@ -54,6 +70,7 @@ class StudentController extends Controller
         }
 
         $attendances = $query->paginate(15)->withQueryString();
+
         return view('student.attendance.history', compact('attendances'));
     }
 
@@ -65,26 +82,43 @@ class StudentController extends Controller
         ]);
 
         $student = auth()->user()->student;
-        if (!$student) {
+        if (! $student) {
             return response()->json(['message' => 'Data siswa tidak ditemukan.'], 422);
+        }
+
+        $now = now();
+        if (! $now->isWeekday()) {
+            return response()->json(['message' => 'Absensi hanya dibuka pada hari Senin sampai Jumat.'], 422);
+        }
+
+        $calendar = AcademicCalendar::with('holidays')
+            ->whereDate('month', $now->copy()->startOfMonth())
+            ->first();
+        if (! $calendar) {
+            return response()->json(['message' => 'Kalender akademik bulan ini belum diperbarui.'], 422);
+        }
+        if ($calendar->isHoliday($now)) {
+            return response()->json(['message' => 'Hari ini merupakan hari libur akademik.'], 422);
+        }
+        if ($calendar->isLocked($now)) {
+            return response()->json(['message' => 'Absensi bulan ini sudah ditutup permanen.'], 422);
         }
 
         if (DailyAttendance::where('student_id', $student->id)->whereDate('date', today())->exists()) {
             return response()->json(['message' => 'Anda sudah melakukan absensi hari ini.'], 422);
         }
 
-        $now = now();
         $setting = AttendanceSetting::first();
         $start = Carbon::today()->setTimeFromTimeString($setting?->start_time ?? '06:00:00');
         $end = Carbon::today()->setTimeFromTimeString($setting?->end_time ?? '07:30:00');
-        if (!$now->between($start, $end)) {
+        if (! $now->between($start, $end)) {
             return response()->json([
-                'message' => 'Absensi hanya dibuka pukul ' . $start->format('H:i') . ' sampai ' . $end->format('H:i') . '.',
+                'message' => 'Absensi hanya dibuka pukul '.$start->format('H:i').' sampai '.$end->format('H:i').'.',
             ], 422);
         }
 
         $location = SchoolLocation::first();
-        if (!$location) {
+        if (! $location) {
             return response()->json(['message' => 'Lokasi sekolah belum dikonfigurasi.'], 422);
         }
 
@@ -114,6 +148,7 @@ class StudentController extends Controller
     public function profile()
     {
         $student = auth()->user()->student;
+
         return view('student.profile', compact('student'));
     }
 
@@ -127,6 +162,7 @@ class StudentController extends Controller
 
         auth()->user()->update(['name' => $data['name']]);
         auth()->user()->student()->update(collect($data)->only(['phone', 'address'])->all());
+
         return redirect()->route('student.profile');
     }
 
@@ -138,6 +174,7 @@ class StudentController extends Controller
         ]);
 
         auth()->user()->update(['password' => Hash::make($data['password'])]);
+
         return redirect()->route('student.profile')->with('success', 'Password berhasil diubah.');
     }
 

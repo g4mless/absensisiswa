@@ -97,6 +97,11 @@
                 <span>Waktu Absensi</span>
             </a>
 
+            <a href="{{ route('admin.academic-calendar.index') }}" class="{{ request()->routeIs('admin.academic-calendar.*') ? 'md-sidebar-link-active' : 'md-sidebar-link' }}">
+                <svg class="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 9.75h18M5.25 5.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25A2.25 2.25 0 0 1 18.75 21H5.25A2.25 2.25 0 0 1 3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25Z"/></svg>
+                <span>Kalender Akademik</span>
+            </a>
+
             <a href="{{ route('admin.attendance.index') }}" class="{{ request()->routeIs('admin.attendance.*') ? 'md-sidebar-link-active' : 'md-sidebar-link' }}">
                 <svg class="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/></svg>
                 <span>Absensi</span>

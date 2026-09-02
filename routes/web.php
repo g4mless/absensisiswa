@@ -19,6 +19,7 @@ use App\Http\Controllers\TeacherController;
 use App\Http\Controllers\StudentController;
 use App\Http\Controllers\StudentPklController;
 use App\Http\Controllers\DutyTeacherController;
+use App\Http\Controllers\AcademicCalendarController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', fn() => redirect()->route('login'));
@@ -48,6 +49,8 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
     Route::put('/school-location', [SchoolLocationController::class, 'update'])->name('school-location.update');
     Route::get('/attendance-setting', [AttendanceSettingController::class, 'index'])->name('attendance-setting.index');
     Route::put('/attendance-setting', [AttendanceSettingController::class, 'update'])->name('attendance-setting.update');
+    Route::get('/academic-calendar', [AcademicCalendarController::class, 'index'])->name('academic-calendar.index');
+    Route::put('/academic-calendar', [AcademicCalendarController::class, 'update'])->name('academic-calendar.update');
 
     Route::get('/attendance', [AdminAttendanceController::class, 'index'])->name('attendance.index');
     Route::get('/reports', [AdminReportController::class, 'index'])->name('reports.index');

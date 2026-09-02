@@ -50,7 +50,7 @@
                             Jam Masuk: {{ \Carbon\Carbon::parse($todayAttendance->check_in_time)->format('H:i') }}
                         </p>
                     </div>
-                @else
+                @elseif($attendanceAvailable)
                     {{-- Check-in form --}}
                     <div class="text-center">
                         <div class="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-primary-100">
@@ -131,6 +131,11 @@
                     </button>
 
                     <p class="text-xs text-gray-400">Pastikan GPS aktif dan Anda berada di area sekolah</p>
+                @else
+                    <div class="text-center py-8">
+                        <h3 class="text-lg font-semibold text-gray-900">Absensi Ditutup</h3>
+                        <p class="mt-2 text-sm text-gray-500">{{ $attendanceMessage }}</p>
+                    </div>
                 @endif
             </div>
         </x-card>
