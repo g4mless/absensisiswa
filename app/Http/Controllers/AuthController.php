@@ -28,7 +28,6 @@ class AuthController extends Controller
         if (Auth::attempt([
             'username' => $credentials['username'],
             'password' => $credentials['password'],
-            'is_active' => true,
         ], $request->boolean('remember'))) {
             $request->session()->regenerate();
 
@@ -37,8 +36,7 @@ class AuthController extends Controller
 
         // Siswa masuk menggunakan nama lengkap dan NIS sebagai password.
         $student = User::whereIn('role', ['siswa', 'siswa_pkl'])
-            ->where('is_active', true)
-            ->whereHas('student', fn ($query) => $query->where('is_active', true))
+            ->whereHas('student')
             ->whereRaw('LOWER(name) = ?', [mb_strtolower(trim($credentials['username']))])
             ->first();
 

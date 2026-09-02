@@ -35,7 +35,6 @@
                         <th>Nama</th>
                         <th>Username</th>
                         <th>Peran</th>
-                        <th>Status</th>
                         <th>Aksi</th>
                     </tr>
                 </thead>
@@ -60,11 +59,6 @@
                                 </x-badge>
                             </td>
                             <td>
-                                <x-badge variant="{{ $user->is_active ? 'success' : 'neutral' }}">
-                                    {{ $user->is_active ? 'Aktif' : 'Tidak Aktif' }}
-                                </x-badge>
-                            </td>
-                            <td>
                                 <div class="flex items-center gap-2">
                                     <a href="{{ route('admin.users.edit', $user) }}">
                                         <x-button variant="ghost" size="sm">Edit</x-button>
@@ -79,7 +73,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="5">
+                            <td colspan="4">
                                 <x-empty-state title="Tidak ada pengguna ditemukan" description="Tidak ada pengguna yang cocok dengan kriteria pencarian Anda." />
                             </td>
                         </tr>

@@ -37,7 +37,6 @@
                         <th>NIP</th>
                         <th>Nama</th>
                         <th>Mata Pelajaran</th>
-                        <th>Status</th>
                         <th>Aksi</th>
                     </tr>
                 </thead>
@@ -64,11 +63,6 @@
                                 </div>
                             </td>
                             <td>
-                                <x-badge variant="{{ $teacher->is_active ? 'success' : 'neutral' }}">
-                                    {{ $teacher->is_active ? 'Aktif' : 'Tidak Aktif' }}
-                                </x-badge>
-                            </td>
-                            <td>
                                 <div class="flex items-center gap-2">
                                     <a href="{{ route('admin.teachers.edit', $teacher) }}">
                                         <x-button variant="ghost" size="sm">Edit</x-button>
@@ -83,7 +77,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="5">
+                            <td colspan="4">
                                 <x-empty-state title="Tidak ada guru ditemukan" description="Tidak ada guru yang cocok dengan kriteria pencarian Anda." />
                             </td>
                         </tr>

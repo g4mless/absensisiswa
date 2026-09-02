@@ -31,7 +31,6 @@ class UserController extends Controller
         ]);
         $data['role'] = ['teacher' => 'guru', 'student' => 'siswa'][$data['role']] ?? $data['role'];
         $data['password'] = Hash::make($data['password']);
-        $data['is_active'] = true;
         User::create($data);
 
         return redirect()->route('admin.users.index');
@@ -58,7 +57,6 @@ class UserController extends Controller
             'email' => ['required', 'email', 'max:255', Rule::unique('users', 'email')->ignore($user->id)],
             'password' => ['nullable', 'confirmed', 'min:8'],
             'role' => ['required', Rule::in(['admin', 'guru', 'siswa', 'siswa_pkl', 'teacher', 'student'])],
-            'is_active' => ['nullable', 'boolean'],
         ]);
         $data['role'] = ['teacher' => 'guru', 'student' => 'siswa'][$data['role']] ?? $data['role'];
         if (! empty($data['password'])) {
@@ -66,7 +64,6 @@ class UserController extends Controller
         } else {
             unset($data['password']);
         }
-        $data['is_active'] = $request->boolean('is_active');
         $user->update($data);
 
         return redirect()->route('admin.users.index');

@@ -34,7 +34,6 @@ class AdminStudentController extends Controller
             'class_id' => ['required', 'exists:classes,id'],
             'email' => ['nullable', 'email', 'unique:users,email'],
             'is_pkl' => ['nullable', 'boolean'],
-            'is_active' => ['nullable', 'boolean'],
         ]);
 
         DB::transaction(function () use ($data) {
@@ -44,7 +43,6 @@ class AdminStudentController extends Controller
                 'email' => $data['email'] ?? $data['nis'].'@student.local',
                 'role' => ! empty($data['is_pkl']) ? 'siswa_pkl' : 'siswa',
                 'password' => $data['nis'],
-                'is_active' => $data['is_active'] ?? true,
             ]);
 
             Student::create([
@@ -52,7 +50,6 @@ class AdminStudentController extends Controller
                 'nis' => $data['nis'],
                 'class_id' => $data['class_id'],
                 'is_pkl' => ! empty($data['is_pkl']),
-                'is_active' => $data['is_active'] ?? true,
             ]);
         });
 
@@ -84,20 +81,17 @@ class AdminStudentController extends Controller
             'class_id' => ['required', 'exists:classes,id'],
             'email' => ['nullable', 'email', Rule::unique('users', 'email')->ignore($student->user_id)],
             'is_pkl' => ['nullable', 'boolean'],
-            'is_active' => ['nullable', 'boolean'],
         ]);
         DB::transaction(function () use ($student, $data, $request) {
-            $active = $request->boolean('is_active');
             $isPkl = $request->boolean('is_pkl');
             $student->user->update([
                 'name' => $data['name'],
                 'email' => $data['email'] ?? $student->user->email,
                 'role' => $isPkl ? 'siswa_pkl' : 'siswa',
-                'is_active' => $active,
             ]);
             $student->update([
                 'nis' => $data['nis'], 'class_id' => $data['class_id'],
-                'is_pkl' => $isPkl, 'is_active' => $active,
+                'is_pkl' => $isPkl,
             ]);
         });
         return redirect()->route('admin.students.index');
@@ -105,7 +99,8 @@ class AdminStudentController extends Controller
 
     public function destroy($id)
     {
-        Student::findOrFail($id)->delete();
+        $student = Student::with('user')->findOrFail($id);
+        DB::transaction(fn () => $student->user->delete());
         return redirect()->route('admin.students.index');
     }
 }
