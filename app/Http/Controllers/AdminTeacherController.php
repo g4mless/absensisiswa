@@ -16,7 +16,7 @@ class AdminTeacherController extends Controller
 {
     public function index()
     {
-        $teachers = Teacher::with(['user', 'subjects'])->orderBy('nip')->paginate(15);
+        $teachers = Teacher::with(['user', 'subjects', 'programHead.major'])->orderBy('nip')->paginate(15);
         return view('admin.teachers.index', compact('teachers'));
     }
 

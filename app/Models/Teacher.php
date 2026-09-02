@@ -33,6 +33,11 @@ class Teacher extends Model
         return $this->hasMany(Schedule::class);
     }
 
+    public function programHead()
+    {
+        return $this->hasOne(ProgramHead::class);
+    }
+
     public function getNameAttribute()
     {
         return $this->user->name ?? '-';
