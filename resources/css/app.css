@@ -250,6 +250,9 @@
     border-color: #5c7cfa;
     box-shadow: 0 0 0 3px rgb(92 124 250 / 0.2);
 }
+.md-search-input {
+    padding-left: 2.5rem;
+}
 
 .md-select {
     width: 100%;
@@ -267,6 +270,9 @@
     outline: none;
     border-color: #5c7cfa;
     box-shadow: 0 0 0 3px rgb(92 124 250 / 0.2);
+}
+.md-select-with-icon {
+    padding-right: 2.5rem;
 }
 
 .md-textarea {

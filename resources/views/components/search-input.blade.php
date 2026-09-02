@@ -17,7 +17,7 @@
         value="{{ $value }}"
         placeholder="{{ $placeholder }}"
         {{ $attributes->merge([
-            'class' => 'md-input pl-10 pr-4',
+            'class' => 'md-input md-search-input pr-4',
         ]) }}
     />
 </div>
