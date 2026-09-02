@@ -23,7 +23,7 @@
             id="{{ $name }}"
             name="{{ $name }}"
             {{ $attributes->merge([
-                'class' => 'md-select' . ($error ? ' border-danger-500 focus:border-danger-500 focus:ring-danger-500/20' : ''),
+                'class' => 'md-select md-select-with-icon' . ($error ? ' border-danger-500 focus:border-danger-500 focus:ring-danger-500/20' : ''),
                 'required' => $required,
                 'disabled' => $disabled,
             ]) }}

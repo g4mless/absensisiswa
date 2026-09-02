@@ -9,14 +9,11 @@ class Student extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['user_id', 'nis', 'class_id', 'is_pkl', 'is_active'];
+    protected $fillable = ['user_id', 'nis', 'class_id', 'is_pkl'];
 
     protected function casts(): array
     {
-        return [
-            'is_pkl' => 'boolean',
-            'is_active' => 'boolean',
-        ];
+        return ['is_pkl' => 'boolean'];
     }
 
     public function user()

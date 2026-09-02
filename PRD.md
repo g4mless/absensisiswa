@@ -85,6 +85,21 @@ siswa_pkl
 
 ---
 
+# 4.1 Siklus Data Siswa dan Guru
+
+Data siswa dan guru hanya merepresentasikan orang yang masih terdaftar di
+sekolah. Tidak ada arsip alumni, mantan guru, atau soft delete.
+
+Jika siswa lulus/keluar atau guru resign/keluar, admin menghapus data tersebut
+secara permanen. Akun login, assignment, jadwal, dan data turunan yang
+memiliki foreign key `cascadeOnDelete` ikut dihapus.
+
+Kolom `is_active` tidak digunakan pada `users`, `students`, maupun `teachers`.
+Keberadaan record berarti masih terdaftar; record yang sudah tidak terdaftar
+harus dihapus.
+
+---
+
 # 5. Permissions
 
 | Fitur                | Admin | Guru            | Pembimbing PKL    | Siswa         | Siswa PKL     |
@@ -295,7 +310,8 @@ reason
 changed_at
 ```
 
-Histori perubahan tidak boleh dihapus oleh guru biasa.
+Audit hanya berlaku selama data absensi terkait masih ada. Saat siswa atau
+guru dihapus, audit dan data absensi yang bergantung padanya ikut terhapus.
 
 ---
 
@@ -385,7 +401,7 @@ Laravel Reverb/Broadcasting/WebSocket
 Alpine.js
 ```
 
-Simpan histori:
+Simpan lokasi selama kegiatan PKL aktif:
 
 ```text
 student_pkl_id
@@ -394,6 +410,9 @@ longitude
 accuracy
 recorded_at
 ```
+
+Lokasi PKL bukan arsip permanen. Data lokasi mengikuti siklus hidup siswa dan
+ikut terhapus saat siswa dihapus.
 
 Jangan polling database sebagai mekanisme realtime utama.
 

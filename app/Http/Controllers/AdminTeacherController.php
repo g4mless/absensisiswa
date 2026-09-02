@@ -28,7 +28,6 @@ class AdminTeacherController extends Controller
             'nip' => ['required', 'string', 'max:255', 'unique:teachers,nip'],
             'name' => ['required', 'string', 'max:255'],
             'email' => ['nullable', 'email', 'max:255', 'unique:users,email'],
-            'is_active' => ['nullable', 'boolean'],
         ]);
 
         DB::transaction(function () use ($data) {
@@ -38,12 +37,10 @@ class AdminTeacherController extends Controller
                 'email' => $data['email'] ?? $data['nip'].'@teacher.local',
                 'role' => 'guru',
                 'password' => Hash::make($data['nip']),
-                'is_active' => $data['is_active'] ?? true,
             ]);
             Teacher::create([
                 'user_id' => $user->id,
                 'nip' => $data['nip'],
-                'is_active' => $data['is_active'] ?? true,
             ]);
         });
 
@@ -72,22 +69,21 @@ class AdminTeacherController extends Controller
             'nip' => ['required', 'string', 'max:255', Rule::unique('teachers', 'nip')->ignore($teacher->id)],
             'name' => ['required', 'string', 'max:255'],
             'email' => ['nullable', 'email', 'max:255', Rule::unique('users', 'email')->ignore($teacher->user_id)],
-            'is_active' => ['nullable', 'boolean'],
         ]);
         DB::transaction(function () use ($teacher, $data, $request) {
             $teacher->user->update([
                 'name' => $data['name'],
                 'email' => $data['email'] ?? $teacher->user->email,
-                'is_active' => $request->boolean('is_active'),
             ]);
-            $teacher->update(['nip' => $data['nip'], 'is_active' => $request->boolean('is_active')]);
+            $teacher->update(['nip' => $data['nip']]);
         });
         return redirect()->route('admin.teachers.index');
     }
 
     public function destroy($id)
     {
-        Teacher::findOrFail($id)->delete();
+        $teacher = Teacher::with('user')->findOrFail($id);
+        DB::transaction(fn () => $teacher->user->delete());
         return redirect()->route('admin.teachers.index');
     }
 }

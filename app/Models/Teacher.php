@@ -9,14 +9,7 @@ class Teacher extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['user_id', 'nip', 'is_active'];
-
-    protected function casts(): array
-    {
-        return [
-            'is_active' => 'boolean',
-        ];
-    }
+    protected $fillable = ['user_id', 'nip'];
 
     public function user()
     {

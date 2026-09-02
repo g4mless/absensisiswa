@@ -31,10 +31,6 @@
                         <input type="checkbox" name="is_pkl" value="1" {{ old('is_pkl', $student->is_pkl) ? 'checked' : '' }} class="rounded border-gray-300 text-primary-600 focus:ring-primary-500" />
                         <label class="text-sm text-gray-700">Siswa PKL (Praktek Kerja Lapangan)</label>
                     </div>
-                    <div class="flex items-center gap-2">
-                        <input type="checkbox" name="is_active" value="1" {{ old('is_active', $student->is_active) ? 'checked' : '' }} class="rounded border-gray-300 text-primary-600 focus:ring-primary-500" />
-                        <label class="text-sm text-gray-700">Aktif</label>
-                    </div>
                 </div>
             </div>
             <div class="flex items-center gap-3 mt-6">
