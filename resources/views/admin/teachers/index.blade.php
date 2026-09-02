@@ -19,11 +19,11 @@
                 </x-button>
             </a>
             <div x-data="{ open: false }" class="relative">
-                <button type="button" @click="open = !open" class="md-btn-warning">
-                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+                <x-button variant="warning" x-on:click="open = !open">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
                     Impor
-                </button>
-                <div x-show="open" x-cloak style="display: none;" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50" @click.self="open = false">
+                </x-button>
+                <div x-show="open" x-cloak class="fixed inset-0 z-50 flex items-center justify-center bg-black/50" @click.self="open = false">
                     <div class="bg-white rounded-xl p-6 w-full max-w-md mx-4 shadow-xl" @click.stop>
                         <h3 class="text-lg font-semibold mb-4">Impor Data Guru</h3>
                         <form action="{{ route('admin.teachers.import') }}" method="POST" enctype="multipart/form-data">
@@ -33,8 +33,8 @@
                                 <x-file-upload name="file" label="Pilih File Excel" accept=".xlsx,.xls,.csv" />
                             </div>
                             <div class="flex justify-end gap-2">
-                                <button type="button" @click="open = false" class="md-btn-ghost">Batal</button>
-                                <button type="submit" class="md-btn-primary">Impor</button>
+                                <button type="button" @click="open = false" class="px-4 py-2 text-sm font-medium rounded-lg text-gray-700 bg-gray-100 hover:bg-gray-200 transition-colors">Batal</button>
+                                <button type="submit" class="px-4 py-2 text-sm font-medium rounded-lg bg-primary-600 text-white hover:bg-primary-700 transition-colors">Impor</button>
                             </div>
                         </form>
                     </div>
@@ -67,6 +67,7 @@
                         <th>NIP</th>
                         <th>Nama</th>
                         <th>Mata Pelajaran</th>
+                        <th>Kepala Jurusan</th>
                         <th>Aksi</th>
                     </tr>
                 </thead>
@@ -92,6 +93,13 @@
                                 </div>
                             </td>
                             <td>
+                                @if($teacher->programHead)
+                                    <x-badge variant="warning">{{ $teacher->programHead->major->name ?? '-' }}</x-badge>
+                                @else
+                                    <span class="text-gray-400">-</span>
+                                @endif
+                            </td>
+                            <td>
                                 <div class="flex items-center gap-2">
                                     <a href="{{ route('admin.teachers.edit', $teacher) }}">
                                         <x-button variant="ghost" size="sm">Edit</x-button>
@@ -106,7 +114,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="4">
+                            <td colspan="5">
                                 <x-empty-state title="Tidak ada guru ditemukan" description="Tidak ada guru yang cocok dengan kriteria pencarian Anda." />
                             </td>
                         </tr>

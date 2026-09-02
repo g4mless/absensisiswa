@@ -96,7 +96,6 @@
                                     </div>
                                     <div>
                                         <p class="font-medium">{{ $student->name }}</p>
-                                        <p class="text-sm text-gray-500">{{ $student->phone ?? 'Nomor telepon belum diisi' }}</p>
                                     </div>
                                 </div>
                             </td>
