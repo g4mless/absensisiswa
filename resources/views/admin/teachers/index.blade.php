@@ -53,17 +53,67 @@
         <x-alert variant="success" title="Berhasil" dismissible>{{ session('success') }}</x-alert>
     @endif
 
-    <x-card>
+    @php
+        $grouped = $teachers->getCollection()->groupBy(function ($teacher) {
+            return $teacher->subjects->first()->name ?? 'Lainnya';
+        });
+    @endphp
+
+    <x-card x-data="{
+        selected: [],
+        allItemIds: {{ $teachers->getCollection()->pluck('id')->toJson() }},
+        get allSelected() {
+            return this.allItemIds.length > 0 && this.selected.length === this.allItemIds.length;
+        },
+        set allSelected(value) {
+            this.selected = value ? [...this.allItemIds] : [];
+        },
+        toggleCategory(ids) {
+            const allSelected = ids.every(id => this.selected.includes(id));
+            if (allSelected) {
+                this.selected = this.selected.filter(id => !ids.includes(id));
+            } else {
+                this.selected = [...new Set([...this.selected, ...ids])];
+            }
+        },
+        categoryAllSelected(ids) {
+            return ids.length > 0 && ids.every(id => this.selected.includes(id));
+        }
+    }">
         <div class="mb-4">
             <form method="GET" action="{{ route('admin.teachers.index') }}">
                 <x-search-input name="search" placeholder="Cari berdasarkan NIP atau nama..." value="{{ request('search') }}" />
             </form>
         </div>
 
+        <div x-show="selected.length > 0" x-cloak class="mb-4 p-3 bg-primary-50 border border-primary-200 rounded-lg flex items-center gap-3">
+            <span class="text-sm text-primary-700" x-text="selected.length + ' item dipilih'"></span>
+            <button type="button" @click="
+                if(confirm('Hapus ' + selected.length + ' guru yang dipilih?')) {
+                    fetch('{{ route('admin.teachers.bulk-destroy') }}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify({ ids: selected })
+                    }).then(r => r.json()).then(data => {
+                        if(data.errors) { alert('Gagal menghapus: ' + Object.values(data.errors).flat().join(', ')); }
+                        else { window.location.reload(); }
+                    }).catch(() => { window.location.reload(); });
+                }
+            " class="text-sm text-red-600 font-medium hover:underline">Hapus Terpilih</button>
+            <button type="button" @click="selected = []" class="text-sm text-primary-600 hover:underline">Batal</button>
+        </div>
+
         <div class="overflow-x-auto">
             <x-table>
                 <thead>
                     <tr>
+                        <th class="w-12">
+                            <input type="checkbox" x-model="allSelected" class="rounded border-gray-300 text-primary-600 focus:ring-primary-500">
+                        </th>
                         <th>NIP</th>
                         <th>Nama</th>
                         <th>Mata Pelajaran</th>
@@ -71,55 +121,75 @@
                         <th>Aksi</th>
                     </tr>
                 </thead>
-                <tbody>
-                    @forelse($teachers as $teacher)
-                        <tr>
-                            <td class="font-mono text-sm">{{ $teacher->nip }}</td>
-                            <td>
-                                <div class="flex items-center gap-3">
-                                    <div class="w-8 h-8 rounded-full bg-info-100 flex items-center justify-center">
-                                        <span class="text-sm font-medium text-info-600">{{ substr($teacher->name, 0, 1) }}</span>
-                                    </div>
-                                    <div>
-                                        <p class="font-medium">{{ $teacher->name }}</p>
-                                    </div>
-                                </div>
-                            </td>
-                            <td>
-                                <div class="flex flex-wrap gap-1">
-                                    @foreach($teacher->subjects as $subject)
-                                        <x-badge variant="info">{{ $subject->name }}</x-badge>
-                                    @endforeach
-                                </div>
-                            </td>
-                            <td>
-                                @if($teacher->programHead)
-                                    <x-badge variant="warning">{{ $teacher->programHead->major->name ?? '-' }}</x-badge>
-                                @else
-                                    <span class="text-gray-400">-</span>
-                                @endif
-                            </td>
-                            <td>
+                @forelse($grouped as $subjectName => $items)
+                    @php $catIds = $items->pluck('id')->toArray(); @endphp
+                    <tbody>
+                        <tr class="bg-gray-50">
+                            <td colspan="6" class="px-4 py-2">
                                 <div class="flex items-center gap-2">
-                                    <a href="{{ route('admin.teachers.edit', $teacher) }}">
-                                        <x-button variant="ghost" size="sm">Edit</x-button>
-                                    </a>
-                                    <form action="{{ route('admin.teachers.destroy', $teacher) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin?')">
-                                        @csrf
-                                        @method('DELETE')
-                                        <x-button variant="danger" size="sm" type="submit">Hapus</x-button>
-                                    </form>
+                                    <input type="checkbox"
+                                           x-effect="$el.checked = categoryAllSelected({{ json_encode($catIds) }})"
+                                           @click.prevent="toggleCategory({{ json_encode($catIds) }})"
+                                           class="rounded border-gray-300 text-primary-600 focus:ring-primary-500">
+                                    <span class="font-semibold text-sm text-gray-700">{{ $subjectName }}</span>
+                                    <span class="text-xs text-gray-500">({{ $items->count() }} guru)</span>
                                 </div>
                             </td>
                         </tr>
-                    @empty
+                        @foreach($items as $teacher)
+                            <tr>
+                                <td>
+                                    <input type="checkbox" value="{{ $teacher->id }}" x-model="selected" class="rounded border-gray-300 text-primary-600 focus:ring-primary-500">
+                                </td>
+                                <td class="font-mono text-sm">{{ $teacher->nip }}</td>
+                                <td>
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-8 h-8 rounded-full bg-info-100 flex items-center justify-center">
+                                            <span class="text-sm font-medium text-info-600">{{ substr($teacher->name, 0, 1) }}</span>
+                                        </div>
+                                        <div>
+                                            <p class="font-medium">{{ $teacher->name }}</p>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="flex flex-wrap gap-1">
+                                        @foreach($teacher->subjects as $subject)
+                                            <x-badge variant="info">{{ $subject->name }}</x-badge>
+                                        @endforeach
+                                    </div>
+                                </td>
+                                <td>
+                                    @if($teacher->programHead)
+                                        <x-badge variant="warning">{{ $teacher->programHead->major->name ?? '-' }}</x-badge>
+                                    @else
+                                        <span class="text-gray-400">-</span>
+                                    @endif
+                                </td>
+                                <td>
+                                    <div class="flex items-center gap-2">
+                                        <a href="{{ route('admin.teachers.edit', $teacher) }}">
+                                            <x-button variant="ghost" size="sm">Edit</x-button>
+                                        </a>
+                                        <form action="{{ route('admin.teachers.destroy', $teacher) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin?')">
+                                            @csrf
+                                            @method('DELETE')
+                                            <x-button variant="danger" size="sm" type="submit">Hapus</x-button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                @empty
+                    <tbody>
                         <tr>
-                            <td colspan="5">
+                            <td colspan="6">
                                 <x-empty-state title="Tidak ada guru ditemukan" description="Tidak ada guru yang cocok dengan kriteria pencarian Anda." />
                             </td>
                         </tr>
-                    @endforelse
-                </tbody>
+                    </tbody>
+                @endforelse
             </x-table>
         </div>
 

@@ -23,11 +23,44 @@
         <x-alert variant="success" title="Berhasil" dismissible>{{ session('success') }}</x-alert>
     @endif
 
-    <x-card>
+    <x-card x-data="{
+        selected: [],
+        allItemIds: {{ $teacherSubjects->getCollection()->pluck('id')->toJson() }},
+        get allSelected() {
+            return this.allItemIds.length > 0 && this.selected.length === this.allItemIds.length;
+        },
+        set allSelected(value) {
+            this.selected = value ? [...this.allItemIds] : [];
+        }
+    }">
+        <div x-show="selected.length > 0" x-cloak class="mb-4 p-3 bg-primary-50 border border-primary-200 rounded-lg flex items-center gap-3">
+            <span class="text-sm text-primary-700" x-text="selected.length + ' item dipilih'"></span>
+            <button type="button" @click="
+                if(confirm('Hapus ' + selected.length + ' penugasan yang dipilih?')) {
+                    fetch('{{ route('admin.teacher-subjects.bulk-destroy') }}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify({ ids: selected })
+                    }).then(r => r.json()).then(data => {
+                        if(data.errors) { alert('Gagal menghapus: ' + Object.values(data.errors).flat().join(', ')); }
+                        else { window.location.reload(); }
+                    }).catch(() => { window.location.reload(); });
+                }
+            " class="text-sm text-red-600 font-medium hover:underline">Hapus Terpilih</button>
+            <button type="button" @click="selected = []" class="text-sm text-primary-600 hover:underline">Batal</button>
+        </div>
+
         <div class="overflow-x-auto">
             <x-table>
                 <thead>
                     <tr>
+                        <th class="w-12">
+                            <input type="checkbox" x-model="allSelected" class="rounded border-gray-300 text-primary-600 focus:ring-primary-500">
+                        </th>
                         <th>Guru</th>
                         <th>Mata Pelajaran</th>
                         <th>Kelas</th>
@@ -37,6 +70,9 @@
                 <tbody>
                     @forelse($teacherSubjects as $assignment)
                         <tr>
+                            <td>
+                                <input type="checkbox" value="{{ $assignment->id }}" x-model="selected" class="rounded border-gray-300 text-primary-600 focus:ring-primary-500">
+                            </td>
                             <td class="font-medium">{{ $assignment->teacher->name ?? '-' }}</td>
                             <td>
                                 <x-badge variant="info">{{ $assignment->subject->name ?? '-' }}</x-badge>
@@ -60,7 +96,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="4">
+                            <td colspan="5">
                                 <x-empty-state title="Tidak ada penugasan ditemukan" description="Mulai dengan menugaskan mata pelajaran kepada guru." />
                             </td>
                         </tr>

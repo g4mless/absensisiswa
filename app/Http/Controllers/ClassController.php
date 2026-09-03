@@ -7,9 +7,18 @@ use Illuminate\Http\Request;
 
 class ClassController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $classes = ClassModel::orderBy('name')->paginate(15);
+        $query = ClassModel::query();
+
+        if ($search = $request->input('search')) {
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('major', 'like', "%{$search}%");
+            });
+        }
+
+        $classes = $query->orderBy('name')->paginate(15)->withQueryString();
         return view('admin.classes.index', compact('classes'));
     }
 
@@ -60,5 +69,12 @@ class ClassController extends Controller
         ClassModel::findOrFail($id)->delete();
 
         return redirect()->route('admin.classes.index')->with('success', 'Kelas berhasil dihapus.');
+    }
+
+    public function bulkDestroy(Request $request)
+    {
+        $request->validate(['ids' => 'required|array']);
+        $count = ClassModel::whereIn('id', $request->ids)->delete();
+        return redirect()->route('admin.classes.index')->with('success', $count . ' kelas berhasil dihapus.');
     }
 }

@@ -23,25 +23,61 @@
         <x-alert variant="success" title="Berhasil" dismissible>{{ session('success') }}</x-alert>
     @endif
 
-    <x-card>
+    <x-card x-data="{
+        selected: [],
+        allItemIds: {{ $subjects->getCollection()->pluck('id')->toJson() }},
+        get allSelected() {
+            return this.allItemIds.length > 0 && this.selected.length === this.allItemIds.length;
+        },
+        set allSelected(value) {
+            this.selected = value ? [...this.allItemIds] : [];
+        }
+    }">
         <div class="mb-4">
             <form method="GET" action="{{ route('admin.subjects.index') }}">
                 <x-search-input name="search" placeholder="Cari mata pelajaran..." value="{{ request('search') }}" />
             </form>
         </div>
 
+        <div x-show="selected.length > 0" x-cloak class="mb-4 p-3 bg-primary-50 border border-primary-200 rounded-lg flex items-center gap-3">
+            <span class="text-sm text-primary-700" x-text="selected.length + ' item dipilih'"></span>
+            <button type="button" @click="
+                if(confirm('Hapus ' + selected.length + ' mata pelajaran yang dipilih?')) {
+                    fetch('{{ route('admin.subjects.bulk-destroy') }}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify({ ids: selected })
+                    }).then(r => r.json()).then(data => {
+                        if(data.errors) { alert('Gagal menghapus: ' + Object.values(data.errors).flat().join(', ')); }
+                        else { window.location.reload(); }
+                    }).catch(() => { window.location.reload(); });
+                }
+            " class="text-sm text-red-600 font-medium hover:underline">Hapus Terpilih</button>
+            <button type="button" @click="selected = []" class="text-sm text-primary-600 hover:underline">Batal</button>
+        </div>
+
         <div class="overflow-x-auto">
             <x-table>
                 <thead>
                     <tr>
+                        <th class="w-12">
+                            <input type="checkbox" x-model="allSelected" class="rounded border-gray-300 text-primary-600 focus:ring-primary-500">
+                        </th>
                         <th>Nama</th>
                         <th>Kode</th>
                         <th>Aksi</th>
                     </tr>
                 </thead>
-                <tbody>
-                    @forelse($subjects as $subject)
+                @forelse($subjects as $subject)
+                    <tbody>
                         <tr>
+                            <td>
+                                <input type="checkbox" value="{{ $subject->id }}" x-model="selected" class="rounded border-gray-300 text-primary-600 focus:ring-primary-500">
+                            </td>
                             <td class="font-medium">{{ $subject->name }}</td>
                             <td>
                                 <x-badge variant="info">{{ $subject->code }}</x-badge>
@@ -59,14 +95,16 @@
                                 </div>
                             </td>
                         </tr>
-                    @empty
+                    </tbody>
+                @empty
+                    <tbody>
                         <tr>
-                            <td colspan="3">
+                            <td colspan="4">
                                 <x-empty-state title="Tidak ada mata pelajaran ditemukan" description="Mulai dengan menambahkan mata pelajaran baru." />
                             </td>
                         </tr>
-                    @endforelse
-                </tbody>
+                    </tbody>
+                @endforelse
             </x-table>
         </div>
 

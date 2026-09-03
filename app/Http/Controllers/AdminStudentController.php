@@ -110,6 +110,18 @@ class AdminStudentController extends Controller
         return redirect()->route('admin.students.index');
     }
 
+    public function bulkDestroy(Request $request)
+    {
+        $request->validate(['ids' => 'required|array']);
+        $students = Student::whereIn('id', $request->ids)->with('user')->get();
+        DB::transaction(function () use ($students) {
+            foreach ($students as $student) {
+                $student->user?->delete();
+            }
+        });
+        return redirect()->route('admin.students.index')->with('status', count($students) . ' siswa berhasil dihapus.');
+    }
+
     public function import(Request $request)
     {
         $request->validate([
