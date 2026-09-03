@@ -55,4 +55,11 @@ class SubjectController extends Controller
         Subject::findOrFail($id)->delete();
         return redirect()->route('admin.subjects.index');
     }
+
+    public function bulkDestroy(Request $request)
+    {
+        $request->validate(['ids' => 'required|array']);
+        $count = Subject::whereIn('id', $request->ids)->delete();
+        return redirect()->route('admin.subjects.index')->with('status', $count . ' mata pelajaran berhasil dihapus.');
+    }
 }

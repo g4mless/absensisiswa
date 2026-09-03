@@ -73,4 +73,11 @@ class UserController extends Controller
 
         return redirect()->route('admin.users.index');
     }
+
+    public function bulkDestroy(Request $request)
+    {
+        $request->validate(['ids' => 'required|array']);
+        $count = User::whereIn('id', $request->ids)->delete();
+        return redirect()->route('admin.users.index')->with('status', $count . ' pengguna berhasil dihapus.');
+    }
 }
