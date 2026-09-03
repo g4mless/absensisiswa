@@ -84,27 +84,21 @@
                         </th>
                         <th>Nama</th>
                         <th>Jurusan</th>
-                        <th></th>
-                        <th></th>
+                        <th>Wali Kelas</th>
+                        <th>Aksi</th>
                     </tr>
                 </thead>
-                <tbody>
-                    @forelse($classes as $class)
-                        <tr>
-                            <td class="font-medium">{{ $class->name }}</td>
-                            <td>
-                                <x-badge variant="info">{{ $class->major ?? '-' }}</x-badge>
-                            </td>
-                            <td>
-                                {{ $class->homeroomTeacher?->teacher?->name ?? '-' }}
-                            </td>
-                            <td>
+                @forelse($grouped as $major => $items)
+                    @php $catIds = $items->pluck('id')->toArray(); @endphp
+                    <tbody>
+                        <tr class="bg-gray-50">
+                            <td colspan="5" class="px-4 py-2">
                                 <div class="flex items-center gap-2">
                                     <input type="checkbox"
                                            x-effect="$el.checked = categoryAllSelected({{ json_encode($catIds) }})"
                                            @click.prevent="toggleCategory({{ json_encode($catIds) }})"
                                            class="rounded border-gray-300 text-primary-600 focus:ring-primary-500">
-                                    <span class="font-semibold text-sm text-gray-700">{{ $major }}</span>
+                                    <span class="font-semibold text-sm text-gray-700">{{ $major ?: 'Lainnya' }}</span>
                                     <span class="text-xs text-gray-500">({{ $items->count() }} kelas)</span>
                                 </div>
                             </td>
@@ -118,6 +112,7 @@
                                 <td>
                                     <x-badge variant="info">{{ $class->major ?? '-' }}</x-badge>
                                 </td>
+                                <td>{{ $class->homeroomTeacher?->teacher?->name ?? '-' }}</td>
                                 <td>
                                     <div class="flex items-center gap-2">
                                         <a href="{{ route('admin.classes.edit', $class) }}">
@@ -136,7 +131,7 @@
                 @empty
                     <tbody>
                         <tr>
-                            <td colspan="4">
+                            <td colspan="5">
                                 <x-empty-state title="Tidak ada kelas ditemukan" description="Mulai dengan menambahkan kelas baru." />
                             </td>
                         </tr>
