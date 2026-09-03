@@ -6,6 +6,7 @@ use App\Models\AcademicCalendar;
 use App\Models\AttendanceSetting;
 use App\Models\DailyAttendance;
 use App\Models\SchoolLocation;
+use App\Services\Attendance\LocationRandomnessService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -74,11 +75,17 @@ class StudentController extends Controller
         return view('student.attendance.history', compact('attendances'));
     }
 
-    public function checkin(Request $request)
+    public function checkin(Request $request, LocationRandomnessService $randomness)
     {
         $data = $request->validate([
-            'latitude' => ['required', 'numeric', 'between:-90,90'],
-            'longitude' => ['required', 'numeric', 'between:-180,180'],
+            'latitude' => ['nullable', 'required_without:samples', 'numeric', 'between:-90,90'],
+            'longitude' => ['nullable', 'required_without:samples', 'numeric', 'between:-180,180'],
+            'accuracy' => ['nullable', 'numeric', 'min:0', 'max:100000'],
+            'samples' => ['nullable', 'array', 'min:1', 'max:10'],
+            'samples.*.latitude' => ['required_with:samples', 'numeric', 'between:-90,90'],
+            'samples.*.longitude' => ['required_with:samples', 'numeric', 'between:-180,180'],
+            'samples.*.accuracy' => ['nullable', 'numeric', 'min:0', 'max:100000'],
+            'samples.*.timestamp' => ['nullable', 'integer', 'min:0'],
         ]);
 
         $student = auth()->user()->student;
@@ -122,9 +129,27 @@ class StudentController extends Controller
             return response()->json(['message' => 'Lokasi sekolah belum dikonfigurasi.'], 422);
         }
 
+        // --- GPS movement randomness detection ---
+        // Kumpulkan seluruh sample (bukan hanya titik terakhir), analisis
+        // seberapa random koordinat selama sampling sebagai INDIKASI
+        // (bukan kepastian) Fake GPS. Hasil suspicious TIDAK memblokir absensi.
+        $samples = $data['samples'] ?? [];
+        if ($samples === [] && isset($data['latitude'], $data['longitude'])) {
+            $samples = [[
+                'latitude' => $data['latitude'],
+                'longitude' => $data['longitude'],
+                'accuracy' => $data['accuracy'] ?? null,
+                'timestamp' => now()->valueOf(),
+            ]];
+        }
+
+        $analysis = $randomness->analyze($samples);
+        $representative = $randomness->representativeCoordinate($samples)
+            ?? ['latitude' => (float) ($data['latitude'] ?? 0), 'longitude' => (float) ($data['longitude'] ?? 0), 'accuracy' => $data['accuracy'] ?? null];
+
         $distance = $this->distanceInMeters(
-            (float) $data['latitude'],
-            (float) $data['longitude'],
+            (float) $representative['latitude'],
+            (float) $representative['longitude'],
             (float) $location->latitude,
             (float) $location->longitude,
         );
@@ -137,12 +162,26 @@ class StudentController extends Controller
             'date' => today(),
             'status' => 'hadir',
             'check_in_time' => $now->format('H:i:s'),
-            'latitude' => $data['latitude'],
-            'longitude' => $data['longitude'],
+            'latitude' => $representative['latitude'],
+            'longitude' => $representative['longitude'],
+            'accuracy' => $representative['accuracy'],
             'source' => 'web',
+            'gps_samples' => array_values($samples),
+            'sample_count' => $analysis['sample_count'],
+            'unique_coordinates' => $analysis['unique_coordinates'],
+            'duplicate_ratio' => $analysis['duplicate_ratio'],
+            'max_spread_meters' => $analysis['max_spread_meters'],
+            'is_location_suspicious' => $analysis['is_suspicious'],
+            'location_flags' => $analysis['flags'],
         ]);
 
-        return response()->json(['message' => 'Check in berhasil!']);
+        return response()->json([
+            'message' => 'Check in berhasil!',
+            'location_analysis' => $analysis,
+            'warning' => $analysis['is_suspicious']
+                ? 'Lokasi terdeteksi terlalu statis (indikasi Fake GPS). Data tetap disimpan untuk verifikasi.'
+                : null,
+        ]);
     }
 
     public function profile()

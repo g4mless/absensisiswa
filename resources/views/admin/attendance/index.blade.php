@@ -33,6 +33,7 @@
                         <th>Tanggal</th>
                         <th>Status</th>
                         <th>Waktu Masuk</th>
+                        <th>GPS</th>
                         <th>Catatan</th>
                     </tr>
                 </thead>
@@ -48,11 +49,23 @@
                                 </x-badge>
                             </td>
                             <td class="font-mono text-sm">{{ $record->check_in_time ? \Carbon\Carbon::parse($record->check_in_time)->format('H:i') : '-' }}</td>
+                            <td>
+                                @if($record->is_location_suspicious)
+                                    <x-badge variant="danger" title="{{ implode(', ', $record->location_flags ?? []) }}">SPOOFING?</x-badge>
+                                @elseif(!empty($record->location_flags))
+                                    <x-badge variant="warning" title="{{ implode(', ', $record->location_flags ?? []) }}">RISK</x-badge>
+                                @else
+                                    <span class="text-xs text-gray-400">-</span>
+                                @endif
+                                @if(!is_null($record->sample_count))
+                                    <div class="mt-1 text-xs text-gray-500 font-mono">{{ $record->sample_count }} smp / {{ $record->unique_coordinates }} uniq / {{ $record->max_spread_meters }} m</div>
+                                @endif
+                            </td>
                             <td class="text-sm text-gray-500 max-w-[200px] truncate">{{ $record->notes ?? '-' }}</td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="6">
+                            <td colspan="7">
                                 <x-empty-state title="Tidak ada catatan absensi ditemukan" description="Tidak ada catatan yang cocok dengan kriteria filter Anda." />
                             </td>
                         </tr>

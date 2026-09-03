@@ -113,7 +113,7 @@
                     <button
                         type="button"
                         @click="checkIn()"
-                        :disabled="loading || !gpsReady"
+                        :disabled="loading || sampling || !gpsReady"
                         class="inline-flex items-center gap-2 rounded-xl bg-primary-600 px-8 py-4 text-lg font-semibold text-white shadow-lg shadow-primary-200 transition-all hover:bg-primary-700 hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         <template x-if="loading">
@@ -127,8 +127,10 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                             </svg>
                         </template>
-                        <span x-text="loading ? 'Mengirim...' : 'Check In Sekarang'"></span>
+                        <span x-text="loading ? (sampling ? samplingProgress || 'Mengumpulkan sampel GPS...' : 'Mengirim...') : 'Check In Sekarang'"></span>
                     </button>
+
+                    <p x-show="sampling" class="text-xs text-blue-600" x-text="samplingProgress"></p>
 
                     <p class="text-xs text-gray-400">Pastikan GPS aktif dan Anda berada di area sekolah</p>
                 @else
@@ -152,6 +154,10 @@ function attendanceCheckin() {
         gpsError: false,
         gpsStatusText: 'Mendapatkan lokasi...',
         loading: false,
+        sampling: false,
+        samplingProgress: '',
+        sampleCount: 0,
+        targetSamples: 8,
         statusMessage: '',
         statusType: 'info',
 
@@ -181,13 +187,93 @@ function attendanceCheckin() {
             );
         },
 
+        collectSamples() {
+            // Kumpulkan 5-10 sample dalam maksimal 10 detik via watchPosition.
+            return new Promise((resolve) => {
+                if (!navigator.geolocation) {
+                    resolve([]);
+                    return;
+                }
+
+                const samples = [];
+                const maxSamples = 10;
+                const maxDurationMs = 10000;
+                this.sampling = true;
+                this.sampleCount = 0;
+                this.samplingProgress = 'Mengumpulkan sampel GPS (0/' + this.targetSamples + ')...';
+                this.gpsStatusText = 'Mengumpulkan sampel GPS...';
+
+                const watchId = navigator.geolocation.watchPosition(
+                    (position) => {
+                        samples.push({
+                            latitude: position.coords.latitude,
+                            longitude: position.coords.longitude,
+                            accuracy: position.coords.accuracy ?? null,
+                            timestamp: position.timestamp ?? Date.now(),
+                        });
+                        this.sampleCount = samples.length;
+                        this.samplingProgress = 'Mengumpulkan sampel GPS (' + samples.length + '/' + this.targetSamples + ')...';
+
+                        // Update tampilan koordinat terakhir.
+                        this.latitude = position.coords.latitude.toFixed(6);
+                        this.longitude = position.coords.longitude.toFixed(6);
+
+                        if (samples.length >= this.targetSamples) {
+                            navigator.geolocation.clearWatch(watchId);
+                            clearTimeout(timer);
+                            this.sampling = false;
+                            resolve(samples);
+                        }
+                    },
+                    () => {
+                        // Abaikan error sesaat, biarkan timeout yang memutuskan.
+                    },
+                    { enableHighAccuracy: true, maximumAge: 0, timeout: 10000 }
+                );
+
+                const timer = setTimeout(() => {
+                    navigator.geolocation.clearWatch(watchId);
+                    this.sampling = false;
+                    resolve(samples);
+                }, maxDurationMs);
+
+                // Simpan agar tidak leak jika target tercapai duluan.
+                if (samples.length >= maxSamples) {
+                    navigator.geolocation.clearWatch(watchId);
+                    clearTimeout(timer);
+                    this.sampling = false;
+                    resolve(samples);
+                }
+            });
+        },
+
         async checkIn() {
-            if (!this.gpsReady || this.loading) return;
+            if (!this.gpsReady || this.loading || this.sampling) return;
 
             this.loading = true;
             this.statusMessage = '';
 
             try {
+                const samples = await this.collectSamples();
+
+                if (samples.length === 0) {
+                    this.statusMessage = 'Gagal mendapatkan sampel GPS. Pastikan GPS aktif lalu coba lagi.';
+                    this.statusType = 'danger';
+                    this.loading = false;
+                    this.getLocation();
+                    return;
+                }
+
+                const last = samples[samples.length - 1];
+                const payload = {
+                    latitude: Number(last.latitude.toFixed(6)),
+                    longitude: Number(last.longitude.toFixed(6)),
+                    accuracy: last.accuracy,
+                    samples: samples,
+                };
+
+                this.samplingProgress = 'Mengirim ' + samples.length + ' sampel ke server...';
+
                 const response = await fetch('{{ route("student.attendance.checkin") }}', {
                     method: 'POST',
                     headers: {
@@ -195,20 +281,23 @@ function attendanceCheckin() {
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
                         'Accept': 'application/json',
                     },
-                    body: JSON.stringify({
-                        latitude: this.latitude,
-                        longitude: this.longitude,
-                    }),
+                    body: JSON.stringify(payload),
                 });
 
                 const data = await response.json();
 
                 if (response.ok) {
                     this.statusMessage = data.message || 'Check in berhasil!';
-                    this.statusType = 'success';
-                    setTimeout(() => window.location.reload(), 1500);
+                    if (data.warning) {
+                        this.statusMessage += ' ' + data.warning;
+                    }
+                    this.statusType = data.warning ? 'info' : 'success';
+                    setTimeout(() => window.location.reload(), 2000);
                 } else {
                     this.statusMessage = data.message || 'Gagal melakukan check in';
+                    if (data.errors && data.errors.samples) {
+                        this.statusMessage += ' (' + data.errors.samples.join(', ') + ')';
+                    }
                     this.statusType = 'danger';
                 }
             } catch (e) {
@@ -216,6 +305,8 @@ function attendanceCheckin() {
                 this.statusType = 'danger';
             } finally {
                 this.loading = false;
+                this.sampling = false;
+                this.samplingProgress = '';
             }
         }
     };
