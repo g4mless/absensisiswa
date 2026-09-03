@@ -1,6 +1,6 @@
 {{-- Siswa PKL Sidebar (Desktop) --}}
 <aside
-    class="fixed inset-y-0 left-0 z-50 flex w-72 flex-col border-r border-gray-200 bg-white transition-transform duration-300 lg:translate-x-0"
+    class="fixed inset-y-0 left-0 z-50 hidden w-72 flex-col border-r border-gray-200 bg-white transition-transform duration-300 lg:flex lg:translate-x-0"
     :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'"
 >
     {{-- Logo --}}
