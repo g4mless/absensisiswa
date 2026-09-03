@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\Subject;
 use Illuminate\Http\Request;
-use Illuminate\Validation\Rule;
 
 class SubjectController extends Controller
 {
@@ -23,7 +22,6 @@ class SubjectController extends Controller
     {
         Subject::create($request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'code' => ['required', 'string', 'max:255', 'unique:subjects,code'],
         ]));
         return redirect()->route('admin.subjects.index');
     }
@@ -45,7 +43,6 @@ class SubjectController extends Controller
         $subject = Subject::findOrFail($id);
         $subject->update($request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'code' => ['required', 'string', 'max:255', Rule::unique('subjects', 'code')->ignore($subject->id)],
         ]));
         return redirect()->route('admin.subjects.index');
     }

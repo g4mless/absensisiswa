@@ -16,7 +16,7 @@
             @csrf
             @method('PUT')
             <div class="space-y-4">
-                <x-select label="Hari" name="day" :options="['Monday' => 'Senin', 'Tuesday' => 'Selasa', 'Wednesday' => 'Rabu', 'Thursday' => 'Kamis', 'Friday' => 'Jumat', 'Saturday' => 'Sabtu']" placeholder="Pilih Hari" :error="$errors->first('day')" value="{{ old('day', $schedule->day) }}" />
+                <x-select label="Hari" name="day" :options="['Monday' => 'Senin', 'Tuesday' => 'Selasa', 'Wednesday' => 'Rabu', 'Thursday' => 'Kamis', 'Friday' => 'Jumat']" placeholder="Pilih Hari" :error="$errors->first('day')" value="{{ old('day', $schedule->day) }}" />
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <x-input label="Waktu Mulai" name="start_time" type="time" :error="$errors->first('start_time')" value="{{ old('start_time', $schedule->start_time) }}" />
                     <x-input label="Waktu Selesai" name="end_time" type="time" :error="$errors->first('end_time')" value="{{ old('end_time', $schedule->end_time) }}" />

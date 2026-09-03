@@ -16,7 +16,6 @@
             @csrf
             <div class="space-y-4">
                 <x-input label="Nama Mata Pelajaran" name="name" :error="$errors->first('name')" value="{{ old('name') }}" placeholder="contoh: Matematika" />
-                <x-input label="Kode" name="code" :error="$errors->first('code')" value="{{ old('code') }}" placeholder="contoh: MT-001" />
             </div>
             <div class="flex items-center gap-3 mt-6">
                 <x-button variant="primary" type="submit">Buat Mata Pelajaran</x-button>

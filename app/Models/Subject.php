@@ -9,7 +9,7 @@ class Subject extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name', 'code', 'description'];
+    protected $fillable = ['name', 'description'];
 
     public function teacherSubjects()
     {
