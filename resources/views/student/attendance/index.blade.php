@@ -59,8 +59,15 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z"/>
                             </svg>
                         </div>
-                        <h3 class="mt-4 text-lg font-semibold text-gray-900">Check In</h3>
-                         <p class="mt-1 text-sm text-gray-500">Absensi dibuka pukul {{ substr($attendanceSetting->start_time, 0, 5) }} sampai {{ substr($attendanceSetting->end_time, 0, 5) }}</p>
+                         <h3 class="mt-4 text-lg font-semibold text-gray-900">Check In</h3>
+                        <p class="mt-1 text-sm text-gray-500">Absensi dibuka pukul {{ substr($attendanceSetting->start_time, 0, 5) }} sampai {{ substr($attendanceSetting->end_time, 0, 5) }}</p>
+                     </div>
+
+                    <div class="w-full max-w-md">
+                        <video x-ref="camera" autoplay playsinline muted class="w-full rounded-xl bg-gray-900 object-cover" x-show="cameraReady" x-cloak></video>
+                        <canvas x-ref="canvas" class="hidden"></canvas>
+                        <p x-show="cameraError" class="mt-2 text-sm text-red-600" x-text="cameraError"></p>
+                        <p class="mt-2 text-xs text-gray-500" x-text="cameraReady ? 'Pastikan wajah terlihat jelas, lalu tekan Konfirmasi Selfie.' : 'Kamera akan dibuka setelah menekan Check In Sekarang.'"></p>
                     </div>
 
                     @if($errors->any())
@@ -127,7 +134,7 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                             </svg>
                         </template>
-                        <span x-text="loading ? 'Mengirim...' : 'Check In Sekarang'"></span>
+                        <span x-text="loading ? 'Mengirim...' : (cameraReady ? 'Konfirmasi Selfie' : 'Check In Sekarang')"></span>
                     </button>
 
                     <p class="text-xs text-gray-400">Pastikan GPS aktif dan Anda berada di area sekolah</p>
@@ -152,11 +159,64 @@ function attendanceCheckin() {
         gpsError: false,
         gpsStatusText: 'Mendapatkan lokasi...',
         loading: false,
-        statusMessage: '',
-        statusType: 'info',
+         statusMessage: '',
+         statusType: 'info',
+         cameraReady: false,
+         cameraStream: null,
+         cameraError: '',
+         selfieFile: null,
 
         init() {
             this.getLocation();
+        },
+
+        async startCamera() {
+            if (!navigator.mediaDevices?.getUserMedia) {
+                this.cameraError = 'Browser atau koneksi ini tidak mendukung kamera. Gunakan HTTPS.';
+                return false;
+            }
+
+            try {
+                this.cameraError = '';
+                this.cameraStream = await navigator.mediaDevices.getUserMedia({
+                    video: { facingMode: 'user' },
+                    audio: false,
+                });
+                this.$refs.camera.srcObject = this.cameraStream;
+                this.cameraReady = true;
+                return true;
+            } catch (error) {
+                this.cameraError = 'Akses kamera diperlukan untuk mengambil selfie.';
+                return false;
+            }
+        },
+
+        captureSelfie() {
+            const video = this.$refs.camera;
+            const canvas = this.$refs.canvas;
+            if (!this.cameraReady || !video.videoWidth) return Promise.reject(new Error('Kamera belum siap'));
+
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+
+            return new Promise((resolve, reject) => {
+                canvas.toBlob((blob) => {
+                    if (!blob) {
+                        reject(new Error('Selfie gagal diambil'));
+                        return;
+                    }
+                    this.selfieFile = new File([blob], 'selfie.jpg', { type: 'image/jpeg' });
+                    this.stopCamera();
+                    resolve();
+                }, 'image/jpeg', 0.85);
+            });
+        },
+
+        stopCamera() {
+            this.cameraStream?.getTracks().forEach((track) => track.stop());
+            this.cameraStream = null;
+            this.cameraReady = false;
         },
 
         getLocation() {
@@ -184,21 +244,29 @@ function attendanceCheckin() {
         async checkIn() {
             if (!this.gpsReady || this.loading) return;
 
+            if (!this.cameraReady && !this.selfieFile) {
+                await this.startCamera();
+                return;
+            }
+
             this.loading = true;
             this.statusMessage = '';
 
             try {
+                if (!this.selfieFile) await this.captureSelfie();
+
+                const payload = new FormData();
+                payload.append('latitude', this.latitude);
+                payload.append('longitude', this.longitude);
+                payload.append('selfie', this.selfieFile);
+
                 const response = await fetch('{{ route("student.attendance.checkin") }}', {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json',
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
                         'Accept': 'application/json',
                     },
-                    body: JSON.stringify({
-                        latitude: this.latitude,
-                        longitude: this.longitude,
-                    }),
+                    body: payload,
                 });
 
                 const data = await response.json();

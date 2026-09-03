@@ -33,6 +33,7 @@
                         <th>Tanggal</th>
                         <th>Status</th>
                         <th>Waktu Masuk</th>
+                        <th>Selfie</th>
                         <th>Catatan</th>
                     </tr>
                 </thead>
@@ -48,11 +49,18 @@
                                 </x-badge>
                             </td>
                             <td class="font-mono text-sm">{{ $record->check_in_time ? \Carbon\Carbon::parse($record->check_in_time)->format('H:i') : '-' }}</td>
+                            <td>
+                                @if($record->selfie_path)
+                                    <a href="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($record->selfie_path) }}" target="_blank" rel="noopener" class="text-sm font-medium text-primary-600 hover:text-primary-700">Lihat foto</a>
+                                @else
+                                    <span class="text-xs text-gray-400">-</span>
+                                @endif
+                            </td>
                             <td class="text-sm text-gray-500 max-w-[200px] truncate">{{ $record->notes ?? '-' }}</td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="6">
+                            <td colspan="7">
                                 <x-empty-state title="Tidak ada catatan absensi ditemukan" description="Tidak ada catatan yang cocok dengan kriteria filter Anda." />
                             </td>
                         </tr>

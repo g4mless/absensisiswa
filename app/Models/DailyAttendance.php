@@ -11,7 +11,7 @@ class DailyAttendance extends Model
 
     protected $fillable = [
         'student_id', 'date', 'status', 'check_in_time',
-        'latitude', 'longitude', 'accuracy', 'source',
+        'latitude', 'longitude', 'accuracy', 'source', 'selfie_path',
     ];
 
     public function student()
