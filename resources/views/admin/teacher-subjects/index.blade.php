@@ -51,6 +51,7 @@
                     }).catch(() => { window.location.reload(); });
                 }
             " class="text-sm text-red-600 font-medium hover:underline">Hapus Terpilih</button>
+            <button type="button" x-show="selected.length > 10" @click="if (confirm('PERINGATAN: Hapus semua penugasan? Tindakan ini tidak dapat dibatalkan.')) fetch('{{ route('admin.teacher-subjects.all-destroy') }}', { method: 'POST', headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' } }).then(() => window.location.reload())" class="text-sm text-red-600 font-medium hover:underline">Hapus Semuanya</button>
             <button type="button" @click="selected = []" class="text-sm text-primary-600 hover:underline">Batal</button>
         </div>
 

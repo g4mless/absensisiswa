@@ -8,11 +8,12 @@ use App\Models\Student;
 use App\Models\User;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Maatwebsite\Excel\Concerns\Import;
 use Maatwebsite\Excel\Concerns\ToCollection;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use Maatwebsite\Excel\Concerns\WithMultipleSheets;
 
-class StudentMultiSheetImport implements WithMultipleSheets
+class StudentMultiSheetImport implements Import, WithMultipleSheets
 {
     public function sheets(): array
     {

@@ -98,6 +98,17 @@ class AdminTeacherController extends Controller
         return redirect()->route('admin.teachers.index')->with('status', count($teachers) . ' guru berhasil dihapus.');
     }
 
+    public function allDestroy()
+    {
+        $teachers = Teacher::with('user')->get();
+        DB::transaction(function () use ($teachers) {
+            foreach ($teachers as $teacher) {
+                $teacher->user?->delete();
+            }
+        });
+        return redirect()->route('admin.teachers.index')->with('status', $teachers->count() . ' guru berhasil dihapus.');
+    }
+
     public function import(Request $request)
     {
         $request->validate([

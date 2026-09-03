@@ -84,6 +84,7 @@
                     }).catch(() => { window.location.reload(); });
                 }
                 " class="md-btn-danger">Hapus Terpilih</button>
+                <button type="button" x-show="selected.length > 10" @click="if (confirm('PERINGATAN: Hapus semua siswa? Tindakan ini tidak dapat dibatalkan.')) fetch('{{ route('admin.students.all-destroy') }}', { method: 'POST', headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' } }).then(() => window.location.reload())" class="md-btn-danger">Hapus Semuanya</button>
                 <button type="button" @click="selected = []" class="md-btn-ghost">Batal</button>
             </div>
         </div>
