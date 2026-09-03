@@ -16,7 +16,7 @@
             @csrf
             @method('PUT')
             <div class="space-y-4">
-                <x-teacher-autocomplete :teachers="$teachers" :selected="old('teacher_id', $assignment->teacher_id)" :error="$errors->first('teacher_id')" />
+                <x-teacher-autocomplete :teachers="$teachers" :selected="$assignment->teacher_id" :error="$errors->first('teacher_name')" />
                 <x-student-autocomplete :students="$students" :selected="old('student_id', $assignment->student_id)" :error="$errors->first('student_id')" />
                 <x-input label="Nama Perusahaan/Tempat" name="company_name" :error="$errors->first('company_name')" value="{{ old('company_name', $assignment->company_name) }}" placeholder="contoh: PT Teknologi Nusantara" />
                 <x-input label="Alamat Perusahaan" name="company_address" :error="$errors->first('company_address')" value="{{ old('company_address', $assignment->company_address) }}" />

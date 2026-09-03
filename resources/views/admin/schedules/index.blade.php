@@ -26,7 +26,7 @@
     <x-card>
         <div class="flex flex-col sm:flex-row gap-4 mb-4">
             <form method="GET" action="{{ route('admin.schedules.index') }}">
-                <x-select name="day" :options="['Monday' => 'Senin', 'Tuesday' => 'Selasa', 'Wednesday' => 'Rabu', 'Thursday' => 'Kamis', 'Friday' => 'Jumat', 'Saturday' => 'Sabtu']" placeholder="Semua Hari" value="{{ request('day') }}" />
+                <x-select name="day" :options="['Monday' => 'Senin', 'Tuesday' => 'Selasa', 'Wednesday' => 'Rabu', 'Thursday' => 'Kamis', 'Friday' => 'Jumat']" placeholder="Semua Hari" value="{{ request('day') }}" />
             </form>
             <form method="GET" action="{{ route('admin.schedules.index') }}">
                 <x-select name="class_id" :options="$classes->pluck('name', 'id')->toArray()" placeholder="Semua Kelas" value="{{ request('class_id') }}" />

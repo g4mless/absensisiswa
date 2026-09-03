@@ -39,15 +39,19 @@ class TeacherSubjectController extends Controller
     public function store(Request $request)
     {
         $data = $request->validate([
-            'teacher_id' => ['required', 'exists:teachers,id'],
+            'teacher_name' => ['required', 'string', 'max:255'],
             'subject_id' => ['required', 'exists:subjects,id'],
             'class_ids' => ['required', 'array', 'min:1'],
             'class_ids.*' => ['integer', 'exists:classes,id'],
         ]);
-        DB::transaction(function () use ($data) {
+        $teacher = $this->findTeacherByName($data['teacher_name']);
+        if (!$teacher) {
+            return back()->withErrors(['teacher_name' => 'Guru dengan nama tersebut tidak ditemukan.'])->withInput();
+        }
+        DB::transaction(function () use ($data, $teacher) {
             foreach ($data['class_ids'] as $classId) {
                 TeacherSubject::create([
-                    'teacher_id' => $data['teacher_id'],
+                    'teacher_id' => $teacher->id,
                     'subject_id' => $data['subject_id'],
                     'class_id' => $classId,
                 ]);
@@ -60,12 +64,20 @@ class TeacherSubjectController extends Controller
     {
         $assignment = TeacherSubject::findOrFail($id);
         $data = $request->validate([
-            'teacher_id' => ['required', 'exists:teachers,id'],
+            'teacher_name' => ['required', 'string', 'max:255'],
             'subject_id' => ['required', 'exists:subjects,id'],
             'class_id' => ['required', 'integer', 'exists:classes,id'],
         ]);
+        $teacher = $this->findTeacherByName($data['teacher_name']);
+        if (!$teacher) {
+            return back()->withErrors(['teacher_name' => 'Guru dengan nama tersebut tidak ditemukan.'])->withInput();
+        }
 
-        $assignment->update($data);
+        $assignment->update([
+            'teacher_id' => $teacher->id,
+            'subject_id' => $data['subject_id'],
+            'class_id' => $data['class_id'],
+        ]);
 
         return redirect()->route('admin.teacher-subjects.index')->with('success', 'Penugasan berhasil diperbarui.');
     }
@@ -81,5 +93,12 @@ class TeacherSubjectController extends Controller
         $request->validate(['ids' => 'required|array']);
         $count = TeacherSubject::whereIn('id', $request->ids)->delete();
         return redirect()->route('admin.teacher-subjects.index')->with('status', $count . ' penugasan berhasil dihapus.');
+    }
+
+    private function findTeacherByName(string $name): ?Teacher
+    {
+        return Teacher::whereHas('user', function ($query) use ($name) {
+            $query->whereRaw('LOWER(name) = ?', [strtolower(trim($name))]);
+        })->first();
     }
 }

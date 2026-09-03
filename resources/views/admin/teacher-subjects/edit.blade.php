@@ -16,7 +16,7 @@
             @csrf
             @method('PUT')
             <div class="space-y-4">
-                <x-teacher-autocomplete :teachers="$teachers" :selected="old('teacher_id', $assignment->teacher_id)" :error="$errors->first('teacher_id')" />
+                <x-teacher-autocomplete :teachers="$teachers" :selected="$assignment->teacher_id" :error="$errors->first('teacher_name')" />
                 <x-select label="Mata Pelajaran" name="subject_id" :options="$subjects->pluck('name', 'id')->toArray()" placeholder="Pilih Mata Pelajaran" :error="$errors->first('subject_id')" value="{{ old('subject_id', $assignment->subject_id) }}" />
                 <x-select label="Kelas" name="class_id" :options="$classes->pluck('name', 'id')->toArray()" placeholder="Pilih Kelas" :error="$errors->first('class_id')" value="{{ old('class_id', $assignment->class_id) }}" />
             </div>

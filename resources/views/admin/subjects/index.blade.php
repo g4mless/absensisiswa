@@ -68,7 +68,6 @@
                             <input type="checkbox" x-model="allSelected" class="rounded border-gray-300 text-primary-600 focus:ring-primary-500">
                         </th>
                         <th>Nama</th>
-                        <th>Kode</th>
                         <th>Aksi</th>
                     </tr>
                 </thead>
@@ -79,9 +78,6 @@
                                 <input type="checkbox" value="{{ $subject->id }}" x-model="selected" class="rounded border-gray-300 text-primary-600 focus:ring-primary-500">
                             </td>
                             <td class="font-medium">{{ $subject->name }}</td>
-                            <td>
-                                <x-badge variant="info">{{ $subject->code }}</x-badge>
-                            </td>
                             <td>
                                 <div class="flex items-center gap-2">
                                     <a href="{{ route('admin.subjects.edit', $subject) }}">
@@ -99,7 +95,7 @@
                 @empty
                     <tbody>
                         <tr>
-                            <td colspan="4">
+                            <td colspan="3">
                                 <x-empty-state title="Tidak ada mata pelajaran ditemukan" description="Mulai dengan menambahkan mata pelajaran baru." />
                             </td>
                         </tr>
