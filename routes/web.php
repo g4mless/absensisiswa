@@ -33,17 +33,17 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
     Route::resource('users', UserController::class);
     Route::post('users/bulk-destroy', [UserController::class, 'bulkDestroy'])->name('users.bulk-destroy');
     Route::post('users/all-destroy', [UserController::class, 'allDestroy'])->name('users.all-destroy');
-    Route::resource('students', AdminStudentController::class);
+    Route::get('students/export', [AdminStudentController::class, 'export'])->name('students.export');
     Route::post('students/bulk-destroy', [AdminStudentController::class, 'bulkDestroy'])->name('students.bulk-destroy');
     Route::post('students/all-destroy', [AdminStudentController::class, 'allDestroy'])->name('students.all-destroy');
     Route::post('students/import', [AdminStudentController::class, 'import'])->name('students.import');
-    Route::get('students/export', [AdminStudentController::class, 'export'])->name('students.export');
+    Route::resource('students', AdminStudentController::class);
 
-    Route::resource('teachers', AdminTeacherController::class);
+    Route::get('teachers/export', [AdminTeacherController::class, 'export'])->name('teachers.export');
     Route::post('teachers/bulk-destroy', [AdminTeacherController::class, 'bulkDestroy'])->name('teachers.bulk-destroy');
     Route::post('teachers/all-destroy', [AdminTeacherController::class, 'allDestroy'])->name('teachers.all-destroy');
     Route::post('teachers/import', [AdminTeacherController::class, 'import'])->name('teachers.import');
-    Route::get('teachers/export', [AdminTeacherController::class, 'export'])->name('teachers.export');
+    Route::resource('teachers', AdminTeacherController::class);
     Route::resource('classes', ClassController::class);
     Route::post('classes/bulk-destroy', [ClassController::class, 'bulkDestroy'])->name('classes.bulk-destroy');
     Route::post('classes/all-destroy', [ClassController::class, 'allDestroy'])->name('classes.all-destroy');

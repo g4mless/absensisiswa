@@ -3,15 +3,17 @@
 namespace App\Exports;
 
 use App\Models\Teacher;
+use Illuminate\Support\Collection;
+use Maatwebsite\Excel\Concerns\Export;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
 use Maatwebsite\Excel\Concerns\WithStyles;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
-class TeacherExport implements FromCollection, WithHeadings, WithMapping, WithStyles
+class TeacherExport implements Export, FromCollection, WithHeadings, WithMapping, WithStyles
 {
-    public function collection()
+    public function collection(): Collection
     {
         return Teacher::with(['user', 'subjects'])->orderBy('nip')->get();
     }
@@ -21,7 +23,7 @@ class TeacherExport implements FromCollection, WithHeadings, WithMapping, WithSt
         return ['NIP', 'Nama', 'Mata Pelajaran'];
     }
 
-    public function map($teacher): array
+    public function map(mixed $teacher): array
     {
         return [
             $teacher->nip,
@@ -30,7 +32,7 @@ class TeacherExport implements FromCollection, WithHeadings, WithMapping, WithSt
         ];
     }
 
-    public function styles(Worksheet $sheet): array
+    public function styles(Worksheet $sheet): ?array
     {
         return [
             1 => ['font' => ['bold' => true]],

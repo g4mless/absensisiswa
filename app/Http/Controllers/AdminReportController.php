@@ -5,7 +5,8 @@ namespace App\Http\Controllers;
 use App\Exports\AdminReportExport;
 use App\Models\ClassModel;
 use Illuminate\Http\Request;
-use Maatwebsite\Excel\Excel;
+use Maatwebsite\Excel\Excel as ExcelType;
+use Maatwebsite\Excel\Facades\Excel;
 
 class AdminReportController extends Controller
 {
@@ -26,7 +27,7 @@ class AdminReportController extends Controller
         ]);
 
         $format = $filters['format'];
-        $writerType = $format === 'csv' ? Excel::CSV : Excel::XLSX;
+        $writerType = $format === 'csv' ? ExcelType::CSV : ExcelType::XLSX;
 
         return Excel::download(
             new AdminReportExport($filters),
