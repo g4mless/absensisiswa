@@ -17,7 +17,7 @@
 
     <x-card>
         <form method="GET" action="{{ route('admin.attendance.index') }}" class="flex flex-col sm:flex-row gap-4 mb-4">
-            <x-input label="Tanggal" name="date" type="date" value="{{ request('date', now()->format('Y-m-d')) }}" />
+            <x-input label="Tanggal" name="date" type="date" value="{{ $date }}" />
             <x-select label="Kelas" name="class_id" :options="$classes->pluck('name', 'id')->toArray()" placeholder="Semua Kelas" value="{{ request('class_id') }}" />
             <div class="flex items-end">
                 <x-button variant="primary" type="submit">Filter</x-button>
