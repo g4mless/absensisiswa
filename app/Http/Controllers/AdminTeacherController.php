@@ -86,6 +86,18 @@ class AdminTeacherController extends Controller
         return redirect()->route('admin.teachers.index');
     }
 
+    public function bulkDestroy(Request $request)
+    {
+        $request->validate(['ids' => 'required|array']);
+        $teachers = Teacher::whereIn('id', $request->ids)->with('user')->get();
+        DB::transaction(function () use ($teachers) {
+            foreach ($teachers as $teacher) {
+                $teacher->user?->delete();
+            }
+        });
+        return redirect()->route('admin.teachers.index')->with('status', count($teachers) . ' guru berhasil dihapus.');
+    }
+
     public function import(Request $request)
     {
         $request->validate([

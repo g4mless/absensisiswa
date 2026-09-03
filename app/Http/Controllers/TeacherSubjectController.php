@@ -51,4 +51,11 @@ class TeacherSubjectController extends Controller
         TeacherSubject::findOrFail($id)->delete();
         return redirect()->route('admin.teacher-subjects.index');
     }
+
+    public function bulkDestroy(Request $request)
+    {
+        $request->validate(['ids' => 'required|array']);
+        $count = TeacherSubject::whereIn('id', $request->ids)->delete();
+        return redirect()->route('admin.teacher-subjects.index')->with('status', $count . ' penugasan berhasil dihapus.');
+    }
 }
