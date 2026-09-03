@@ -86,6 +86,10 @@ class StudentController extends Controller
             'samples.*.longitude' => ['required_with:samples', 'numeric', 'between:-180,180'],
             'samples.*.accuracy' => ['nullable', 'numeric', 'min:0', 'max:100000'],
             'samples.*.timestamp' => ['nullable', 'integer', 'min:0'],
+            'samples.*.speed' => ['nullable', 'numeric', 'min:0', 'max:500'],
+            'samples.*.heading' => ['nullable', 'numeric', 'min:0', 'max:360'],
+            'samples.*.altitude' => ['nullable', 'numeric', 'min:-1000', 'max:10000'],
+            'samples.*.altitude_accuracy' => ['nullable', 'numeric', 'min:0', 'max:100000'],
         ]);
 
         $student = auth()->user()->student;
@@ -129,10 +133,11 @@ class StudentController extends Controller
             return response()->json(['message' => 'Lokasi sekolah belum dikonfigurasi.'], 422);
         }
 
-        // --- GPS movement randomness detection ---
-        // Kumpulkan seluruh sample (bukan hanya titik terakhir), analisis
-        // seberapa random koordinat selama sampling sebagai INDIKASI
-        // (bukan kepastian) Fake GPS. Hasil suspicious TIDAK memblokir absensi.
+        // --- GPS movement randomness detection (multi-sinyal + skor) ---
+        // Seluruh sample dianalisis 6 sinyal independen (static, linear,
+        // uniform_steps, accuracy, timing, sensor). Skor >= reject ditolak,
+        // skor >= flag lolos dengan peringatan. Satu sinyal tidak pernah
+        // cukup untuk penolakan (indikasi, bukan kepastian tunggal).
         $samples = $data['samples'] ?? [];
         if ($samples === [] && isset($data['latitude'], $data['longitude'])) {
             $samples = [[
@@ -144,6 +149,14 @@ class StudentController extends Controller
         }
 
         $analysis = $randomness->analyze($samples);
+
+        if (($analysis['risk_action'] ?? 'allow') === 'reject') {
+            return response()->json([
+                'message' => 'Check-in ditolak: pola lokasi terdeteksi sebagai Fake GPS (skor risiko '.$analysis['risk_score'].'/100). Matikan aplikasi Fake GPS / mock location, aktifkan GPS akurasi tinggi, tunggu beberapa detik, lalu coba lagi.',
+                'location_analysis' => $analysis,
+            ], 422);
+        }
+
         $representative = $randomness->representativeCoordinate($samples)
             ?? ['latitude' => (float) ($data['latitude'] ?? 0), 'longitude' => (float) ($data['longitude'] ?? 0), 'accuracy' => $data['accuracy'] ?? null];
 
@@ -171,6 +184,7 @@ class StudentController extends Controller
             'unique_coordinates' => $analysis['unique_coordinates'],
             'duplicate_ratio' => $analysis['duplicate_ratio'],
             'max_spread_meters' => $analysis['max_spread_meters'],
+            'risk_score' => $analysis['risk_score'],
             'is_location_suspicious' => $analysis['is_suspicious'],
             'location_flags' => $analysis['flags'],
         ]);
@@ -179,7 +193,7 @@ class StudentController extends Controller
             'message' => 'Check in berhasil!',
             'location_analysis' => $analysis,
             'warning' => $analysis['is_suspicious']
-                ? 'Lokasi terdeteksi terlalu statis (indikasi Fake GPS). Data tetap disimpan untuk verifikasi.'
+                ? 'Pola lokasi mencurigakan (skor risiko '.$analysis['risk_score'].'/100, sinyal: '.implode(', ', array_keys($analysis['signals'])).'). Data tetap disimpan untuk verifikasi.'
                 : null,
         ]);
     }

@@ -205,11 +205,16 @@ function attendanceCheckin() {
 
                 const watchId = navigator.geolocation.watchPosition(
                     (position) => {
+                        const c = position.coords;
                         samples.push({
-                            latitude: position.coords.latitude,
-                            longitude: position.coords.longitude,
-                            accuracy: position.coords.accuracy ?? null,
+                            latitude: c.latitude,
+                            longitude: c.longitude,
+                            accuracy: c.accuracy ?? null,
                             timestamp: position.timestamp ?? Date.now(),
+                            speed: c.speed ?? null,
+                            heading: c.heading ?? null,
+                            altitude: c.altitude ?? null,
+                            altitude_accuracy: c.altitudeAccuracy ?? null,
                         });
                         this.sampleCount = samples.length;
                         this.samplingProgress = 'Mengumpulkan sampel GPS (' + samples.length + '/' + this.targetSamples + ')...';
@@ -298,7 +303,15 @@ function attendanceCheckin() {
                     if (data.errors && data.errors.samples) {
                         this.statusMessage += ' (' + data.errors.samples.join(', ') + ')';
                     }
+                    if (data.location_analysis && data.location_analysis.signals) {
+                        const sigs = Object.keys(data.location_analysis.signals).join(', ');
+                        const score = data.location_analysis.risk_score;
+                        this.statusMessage += ' [Skor risiko ' + score + '/100, sinyal: ' + sigs + ']';
+                    }
                     this.statusType = 'danger';
+                    // Siapkan ulang GPS agar pengguna bisa retry setelah
+                    // mematikan Fake GPS / mock location.
+                    this.getLocation();
                 }
             } catch (e) {
                 this.statusMessage = 'Terjadi kesalahan. Silakan coba lagi.';

@@ -51,14 +51,14 @@
                             <td class="font-mono text-sm">{{ $record->check_in_time ? \Carbon\Carbon::parse($record->check_in_time)->format('H:i') : '-' }}</td>
                             <td>
                                 @if($record->is_location_suspicious)
-                                    <x-badge variant="danger" title="{{ implode(', ', $record->location_flags ?? []) }}">SPOOFING?</x-badge>
+                                    <x-badge variant="danger" title="{{ implode(', ', $record->location_flags ?? []) }}">SPOOFING? ({{ $record->risk_score ?? 0 }})</x-badge>
                                 @elseif(!empty($record->location_flags))
-                                    <x-badge variant="warning" title="{{ implode(', ', $record->location_flags ?? []) }}">RISK</x-badge>
+                                    <x-badge variant="warning" title="{{ implode(', ', $record->location_flags ?? []) }}">RISK ({{ $record->risk_score ?? 0 }})</x-badge>
                                 @else
                                     <span class="text-xs text-gray-400">-</span>
                                 @endif
                                 @if(!is_null($record->sample_count))
-                                    <div class="mt-1 text-xs text-gray-500 font-mono">{{ $record->sample_count }} smp / {{ $record->unique_coordinates }} uniq / {{ $record->max_spread_meters }} m</div>
+                                    <div class="mt-1 text-xs text-gray-500 font-mono">{{ $record->sample_count }} smp / {{ $record->unique_coordinates }} uniq / {{ $record->max_spread_meters }} m / skor {{ $record->risk_score ?? 0 }}</div>
                                 @endif
                             </td>
                             <td class="text-sm text-gray-500 max-w-[200px] truncate">{{ $record->notes ?? '-' }}</td>

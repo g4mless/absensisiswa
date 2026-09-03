@@ -13,7 +13,7 @@ class DailyAttendance extends Model
         'student_id', 'date', 'status', 'check_in_time',
         'latitude', 'longitude', 'accuracy', 'source',
         'gps_samples', 'sample_count', 'unique_coordinates',
-        'duplicate_ratio', 'max_spread_meters',
+        'duplicate_ratio', 'max_spread_meters', 'risk_score',
         'is_location_suspicious', 'location_flags',
     ];
 
