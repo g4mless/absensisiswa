@@ -3,53 +3,37 @@
 namespace App\Http\Controllers;
 
 use App\Models\PklSupervisor;
-use App\Models\Student;
-use App\Models\Teacher;
 use Illuminate\Http\Request;
 
 class PklSupervisorController extends Controller
 {
     public function index()
     {
-        $pklSupervisors = PklSupervisor::with(['teacher.user', 'student.user'])->paginate(15);
+        $pklSupervisors = PklSupervisor::orderBy('supervisor_name')->paginate(15);
         return view('admin.pkl-supervisors.index', compact('pklSupervisors'));
     }
 
     public function create()
     {
-        return view('admin.pkl-supervisors.create', [
-            'teachers' => Teacher::with('user')->orderBy('nip')->get(),
-            'students' => Student::with('user')->orderBy('nis')->get(),
-        ]);
+        return view('admin.pkl-supervisors.create');
     }
 
     public function edit($id)
     {
         return view('admin.pkl-supervisors.edit', [
             'assignment' => PklSupervisor::findOrFail($id),
-            'teachers' => Teacher::with('user')->orderBy('nip')->get(),
-            'students' => Student::with('user')->orderBy('nis')->get(),
         ]);
     }
 
     public function store(Request $request)
     {
         $data = $request->validate([
-            'teacher_name' => ['required', 'string', 'max:255'],
-            'student_id' => ['required', 'exists:students,id'],
+            'supervisor_name' => ['required', 'string', 'max:255'],
             'company_name' => ['required', 'string', 'max:255'],
-            'company_address' => ['nullable', 'string'],
+            'company_address' => ['required', 'string'],
+            'contact_phone' => ['nullable', 'string', 'max:30'],
         ]);
-        $teacher = $this->findTeacherByName($data['teacher_name']);
-        if (!$teacher) {
-            return back()->withErrors(['teacher_name' => 'Guru dengan nama tersebut tidak ditemukan.'])->withInput();
-        }
-        PklSupervisor::create([
-            'teacher_id' => $teacher->id,
-            'student_id' => $data['student_id'],
-            'company_name' => $data['company_name'],
-            'company_address' => $data['company_address'],
-        ]);
+        PklSupervisor::create($data);
         return redirect()->route('admin.pkl-supervisors.index');
     }
 
@@ -57,21 +41,12 @@ class PklSupervisorController extends Controller
     {
         $assignment = PklSupervisor::findOrFail($id);
         $data = $request->validate([
-            'teacher_name' => ['required', 'string', 'max:255'],
-            'student_id' => ['required', 'exists:students,id'],
+            'supervisor_name' => ['required', 'string', 'max:255'],
             'company_name' => ['required', 'string', 'max:255'],
-            'company_address' => ['nullable', 'string'],
+            'company_address' => ['required', 'string'],
+            'contact_phone' => ['nullable', 'string', 'max:30'],
         ]);
-        $teacher = $this->findTeacherByName($data['teacher_name']);
-        if (!$teacher) {
-            return back()->withErrors(['teacher_name' => 'Guru dengan nama tersebut tidak ditemukan.'])->withInput();
-        }
-        $assignment->update([
-            'teacher_id' => $teacher->id,
-            'student_id' => $data['student_id'],
-            'company_name' => $data['company_name'],
-            'company_address' => $data['company_address'],
-        ]);
+        $assignment->update($data);
 
         return redirect()->route('admin.pkl-supervisors.index')->with('success', 'Penugasan berhasil diperbarui.');
     }
@@ -128,10 +103,4 @@ class PklSupervisorController extends Controller
         return view('pkl-supervisor.locations.show', compact('locations'));
     }
 
-    private function findTeacherByName(string $name): ?Teacher
-    {
-        return Teacher::whereHas('user', function ($query) use ($name) {
-            $query->whereRaw('LOWER(name) = ?', [strtolower(trim($name))]);
-        })->first();
-    }
 }

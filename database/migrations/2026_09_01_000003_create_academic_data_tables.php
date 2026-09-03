@@ -85,10 +85,10 @@ return new class extends Migration
 
         Schema::create('pkl_supervisors', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('teacher_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('student_id')->constrained()->cascadeOnDelete();
+            $table->string('supervisor_name');
             $table->string('company_name');
-            $table->text('company_address')->nullable();
+            $table->text('company_address');
+            $table->string('contact_phone', 30)->nullable();
             $table->timestamps();
         });
 

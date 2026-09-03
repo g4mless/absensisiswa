@@ -15,11 +15,10 @@
         <form action="{{ route('admin.pkl-supervisors.store') }}" method="POST">
             @csrf
             <div class="space-y-4">
-                <x-teacher-autocomplete :teachers="$teachers" :error="$errors->first('teacher_name')" />
-                <x-student-autocomplete :students="$students" :selected="old('student_id')" :error="$errors->first('student_id')" />
+                <x-input label="Nama Pembimbing PKL" name="supervisor_name" :error="$errors->first('supervisor_name')" value="{{ old('supervisor_name') }}" placeholder="contoh: Budi Santoso" />
                 <x-input label="Nama Perusahaan/Tempat" name="company_name" :error="$errors->first('company_name')" value="{{ old('company_name') }}" placeholder="contoh: PT Teknologi Nusantara" />
                 <x-input label="Alamat Perusahaan" name="company_address" :error="$errors->first('company_address')" value="{{ old('company_address') }}" />
-                <x-input label="Kontak Person" name="contact_person" :error="$errors->first('contact_person')" value="{{ old('contact_person') }}" />
+                <x-input label="Nomor Kontak" name="contact_phone" :error="$errors->first('contact_phone')" value="{{ old('contact_phone') }}" placeholder="contoh: 08123456789" />
             </div>
             <div class="flex items-center gap-3 mt-6">
                 <x-button variant="primary" type="submit">Buat Penugasan</x-button>
