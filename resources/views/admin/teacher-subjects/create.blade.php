@@ -15,7 +15,7 @@
         <form action="{{ route('admin.teacher-subjects.store') }}" method="POST">
             @csrf
             <div class="space-y-4">
-                <x-select label="Guru" name="teacher_id" :options="$teachers->pluck('name', 'id')->toArray()" placeholder="Pilih Guru" :error="$errors->first('teacher_id')" value="{{ old('teacher_id') }}" />
+                <x-teacher-autocomplete :teachers="$teachers" :selected="old('teacher_id')" :error="$errors->first('teacher_id')" />
                 <x-select label="Mata Pelajaran" name="subject_id" :options="$subjects->pluck('name', 'id')->toArray()" placeholder="Pilih Mata Pelajaran" :error="$errors->first('subject_id')" value="{{ old('subject_id') }}" />
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Kelas</label>

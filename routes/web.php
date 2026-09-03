@@ -45,10 +45,10 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
     Route::post('classes/bulk-destroy', [ClassController::class, 'bulkDestroy'])->name('classes.bulk-destroy');
     Route::resource('subjects', SubjectController::class);
     Route::post('subjects/bulk-destroy', [SubjectController::class, 'bulkDestroy'])->name('subjects.bulk-destroy');
-    Route::resource('teacher-subjects', TeacherSubjectController::class)->only(['index', 'create', 'store', 'destroy']);
+    Route::resource('teacher-subjects', TeacherSubjectController::class)->only(['index', 'create', 'store', 'edit', 'update', 'destroy']);
     Route::post('teacher-subjects/bulk-destroy', [TeacherSubjectController::class, 'bulkDestroy'])->name('teacher-subjects.bulk-destroy');
     Route::resource('program-heads', ProgramHeadController::class)->only(['index', 'create', 'store', 'destroy']);
-    Route::resource('pkl-supervisors', PklSupervisorController::class)->only(['index', 'create', 'store', 'destroy']);
+    Route::resource('pkl-supervisors', PklSupervisorController::class)->only(['index', 'create', 'store', 'edit', 'update', 'destroy']);
     Route::post('pkl-supervisors/bulk-destroy', [PklSupervisorController::class, 'bulkDestroy'])->name('pkl-supervisors.bulk-destroy');
     Route::resource('schedules', ScheduleController::class);
 

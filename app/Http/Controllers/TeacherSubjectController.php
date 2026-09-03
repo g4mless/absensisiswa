@@ -26,6 +26,16 @@ class TeacherSubjectController extends Controller
         ]);
     }
 
+    public function edit($id)
+    {
+        return view('admin.teacher-subjects.edit', [
+            'assignment' => TeacherSubject::findOrFail($id),
+            'teachers' => Teacher::with('user')->orderBy('nip')->get(),
+            'subjects' => Subject::orderBy('name')->get(),
+            'classes' => ClassModel::orderBy('name')->get(),
+        ]);
+    }
+
     public function store(Request $request)
     {
         $data = $request->validate([
@@ -44,6 +54,20 @@ class TeacherSubjectController extends Controller
             }
         });
         return redirect()->route('admin.teacher-subjects.index');
+    }
+
+    public function update(Request $request, $id)
+    {
+        $assignment = TeacherSubject::findOrFail($id);
+        $data = $request->validate([
+            'teacher_id' => ['required', 'exists:teachers,id'],
+            'subject_id' => ['required', 'exists:subjects,id'],
+            'class_id' => ['required', 'integer', 'exists:classes,id'],
+        ]);
+
+        $assignment->update($data);
+
+        return redirect()->route('admin.teacher-subjects.index')->with('success', 'Penugasan berhasil diperbarui.');
     }
 
     public function destroy($id)

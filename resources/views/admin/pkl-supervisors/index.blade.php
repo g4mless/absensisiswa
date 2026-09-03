@@ -78,6 +78,9 @@
                             <td>{{ $assignment->company_name ?? '-' }}</td>
                             <td>
                                 <div class="flex items-center gap-2">
+                                    <a href="{{ route('admin.pkl-supervisors.edit', $assignment) }}">
+                                        <x-button variant="ghost" size="sm">Edit</x-button>
+                                    </a>
                                     <form action="{{ route('admin.pkl-supervisors.destroy', $assignment) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin?')">
                                         @csrf
                                         @method('DELETE')

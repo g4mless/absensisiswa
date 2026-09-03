@@ -23,6 +23,15 @@ class PklSupervisorController extends Controller
         ]);
     }
 
+    public function edit($id)
+    {
+        return view('admin.pkl-supervisors.edit', [
+            'assignment' => PklSupervisor::findOrFail($id),
+            'teachers' => Teacher::with('user')->orderBy('nip')->get(),
+            'students' => Student::with('user')->orderBy('nis')->get(),
+        ]);
+    }
+
     public function store(Request $request)
     {
         PklSupervisor::create($request->validate([
@@ -32,6 +41,19 @@ class PklSupervisorController extends Controller
             'company_address' => ['nullable', 'string'],
         ]));
         return redirect()->route('admin.pkl-supervisors.index');
+    }
+
+    public function update(Request $request, $id)
+    {
+        $assignment = PklSupervisor::findOrFail($id);
+        $assignment->update($request->validate([
+            'teacher_id' => ['required', 'exists:teachers,id'],
+            'student_id' => ['required', 'exists:students,id'],
+            'company_name' => ['required', 'string', 'max:255'],
+            'company_address' => ['nullable', 'string'],
+        ]));
+
+        return redirect()->route('admin.pkl-supervisors.index')->with('success', 'Penugasan berhasil diperbarui.');
     }
 
     public function destroy($id)
