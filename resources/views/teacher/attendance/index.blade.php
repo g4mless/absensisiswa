@@ -18,7 +18,7 @@
             <x-card>
                 <x-slot name="header">Pilih Sesi</x-slot>
 
-                <form method="GET" action="{{ route('teacher.attendance.index') }}" class="space-y-4">
+                <form method="GET" action="{{ route('teacher.attendance') }}" class="space-y-4">
                     <x-select label="Tanggal" name="date" :options="$dateOptions ?? []" :value="$selectedDate ?? date('Y-m-d')" />
 
                     <x-button type="submit" variant="primary" class="w-full">
@@ -29,7 +29,7 @@
 
                 <div class="mt-4 pt-4 border-t border-gray-100 space-y-2">
                     @forelse($sessions ?? [] as $session)
-                        <a href="{{ route('teacher.attendance.session', $session->id) }}"
+                        <a href="{{ route('teacher.attendance.show', $session->id) }}"
                            class="block rounded-xl border {{ $selectedSession == $session->id ? 'border-primary-300 bg-primary-50' : 'border-gray-200 hover:border-primary-200 hover:bg-gray-50' }} p-4 transition-colors">
                             <div class="flex items-center justify-between">
                                 <div class="min-w-0">
@@ -55,7 +55,7 @@
                     <x-slot name="header">{{ $selectedSessionData->subject->name ?? '-' }}</x-slot>
                     <x-slot name="subtitle">{{ $selectedSessionData->classroom->name ?? '-' }} &middot; {{ $selectedSessionData->start_time }} - {{ $selectedSessionData->end_time }}</x-slot>
 
-                    <form method="POST" action="{{ route('teacher.attendance.session', $selectedSessionData->id) }}">
+                    <form method="POST" action="{{ route('teacher.attendance.update', $selectedSessionData->id) }}">
                         @csrf
                         <div class="mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                             <div class="flex gap-2">

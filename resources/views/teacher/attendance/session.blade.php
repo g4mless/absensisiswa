@@ -9,7 +9,7 @@
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
             <div class="flex items-center gap-2 mb-1">
-                <a href="{{ route('teacher.attendance.index') }}" class="text-sm text-gray-500 hover:text-primary-600 transition-colors">Absensi</a>
+                <a href="{{ route('teacher.attendance') }}" class="text-sm text-gray-500 hover:text-primary-600 transition-colors">Absensi</a>
                 <svg class="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5"/></svg>
                 <span class="text-sm font-medium text-gray-900">Sesi</span>
             </div>
@@ -44,7 +44,7 @@
                 <x-slot name="header">Daftar Kehadiran</x-slot>
                 <x-slot name="subtitle">{{ count($session->students ?? []) }} siswa</x-slot>
 
-                <form method="POST" action="{{ route('teacher.attendance.session', $session->id) }}">
+                <form method="POST" action="{{ route('teacher.attendance.update', $session->id) }}">
                     @csrf
 
                     <div class="mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
