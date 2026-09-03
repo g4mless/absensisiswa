@@ -22,7 +22,9 @@ class AcademicCalendarController extends Controller
         }
         $selectedHolidays = $calendar?->holidays->pluck('date')
             ->map(fn ($date) => $date->format('Y-m-d'))->values()->all() ?? [];
-        $holidayNames = $calendar?->holidays->pluck('name', 'date')->all() ?? [];
+        $holidayNames = $calendar?->holidays
+            ->mapWithKeys(fn ($holiday) => [$holiday->date->format('Y-m-d') => $holiday->name])
+            ->all() ?? [];
 
         return view('admin.academic-calendar.index', compact('calendar', 'month', 'calendarDays', 'selectedHolidays', 'holidayNames'));
     }

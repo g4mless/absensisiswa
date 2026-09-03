@@ -9,7 +9,9 @@ class ClassController extends Controller
 {
     public function index()
     {
-        $classes = ClassModel::orderBy('name')->paginate(15);
+        $classes = ClassModel::with('homeroomTeacher.teacher.user')
+            ->orderBy('name')
+            ->paginate(15);
         return view('admin.classes.index', compact('classes'));
     }
 

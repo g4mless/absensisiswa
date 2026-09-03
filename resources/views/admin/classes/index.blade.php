@@ -30,8 +30,8 @@
                     <tr>
                         <th>Nama</th>
                         <th>Jurusan</th>
-                        <th>Wali Kelas</th>
-                        <th>Aksi</th>
+                        <th></th>
+                        <th></th>
                     </tr>
                 </thead>
                 <tbody>
@@ -40,6 +40,9 @@
                             <td class="font-medium">{{ $class->name }}</td>
                             <td>
                                 <x-badge variant="info">{{ $class->major ?? '-' }}</x-badge>
+                            </td>
+                            <td>
+                                {{ $class->homeroomTeacher?->teacher?->name ?? '-' }}
                             </td>
                             <td>
                                 <div class="flex items-center gap-2">

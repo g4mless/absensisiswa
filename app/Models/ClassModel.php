@@ -22,4 +22,9 @@ class ClassModel extends Model
         return $this->hasMany(Schedule::class);
     }
 
+    public function homeroomTeacher()
+    {
+        return $this->hasOne(HomeroomTeacher::class, 'class_id');
+    }
+
 }
