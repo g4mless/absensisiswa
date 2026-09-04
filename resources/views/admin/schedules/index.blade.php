@@ -50,9 +50,9 @@
                     @forelse($schedules as $schedule)
                         <tr>
                             <td>
-                                <x-badge variant="info">{{ $schedule->day }}</x-badge>
+                                <x-badge variant="info">{{ ['Monday' => 'Senin', 'Tuesday' => 'Selasa', 'Wednesday' => 'Rabu', 'Thursday' => 'Kamis', 'Friday' => 'Jumat'][$schedule->day] ?? $schedule->day }}</x-badge>
                             </td>
-                            <td class="font-mono text-sm">{{ $schedule->start_time }} - {{ $schedule->end_time }}</td>
+                            <td class="font-mono text-sm">{{ substr($schedule->start_time, 0, 5) }} - {{ substr($schedule->end_time, 0, 5) }}</td>
                             <td class="font-medium">{{ $schedule->subject->name ?? '-' }}</td>
                             <td>{{ $schedule->teacher->name ?? '-' }}</td>
                             <td>{{ $schedule->class->name ?? '-' }}</td>

@@ -18,8 +18,8 @@
             <div class="space-y-4">
                 <x-select label="Hari" name="day" :options="['Monday' => 'Senin', 'Tuesday' => 'Selasa', 'Wednesday' => 'Rabu', 'Thursday' => 'Kamis', 'Friday' => 'Jumat']" placeholder="Pilih Hari" :error="$errors->first('day')" value="{{ old('day', $schedule->day) }}" />
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <x-input label="Waktu Mulai" name="start_time" type="time" :error="$errors->first('start_time')" value="{{ old('start_time', $schedule->start_time) }}" />
-                    <x-input label="Waktu Selesai" name="end_time" type="time" :error="$errors->first('end_time')" value="{{ old('end_time', $schedule->end_time) }}" />
+                    <x-input label="Waktu Mulai" name="start_time" type="text" inputmode="numeric" maxlength="5" placeholder="HH:mm" :error="$errors->first('start_time')" value="{{ old('start_time', substr($schedule->start_time, 0, 5)) }}" />
+                    <x-input label="Waktu Selesai" name="end_time" type="text" inputmode="numeric" maxlength="5" placeholder="HH:mm" :error="$errors->first('end_time')" value="{{ old('end_time', substr($schedule->end_time, 0, 5)) }}" />
                 </div>
                 <x-select label="Mata Pelajaran" name="subject_id" :options="$subjects->pluck('name', 'id')->toArray()" placeholder="Pilih Mata Pelajaran" :error="$errors->first('subject_id')" value="{{ old('subject_id', $schedule->subject_id) }}" />
                 <x-select label="Guru" name="teacher_id" :options="$teachers->pluck('name', 'id')->toArray()" placeholder="Pilih Guru" :error="$errors->first('teacher_id')" value="{{ old('teacher_id', $schedule->teacher_id) }}" />

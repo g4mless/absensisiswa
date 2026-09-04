@@ -4,6 +4,7 @@
     'error' => null,
     'placeholder' => 'Select an option',
     'options' => [],
+    'value' => null,
     'required' => false,
     'disabled' => false,
 ])
@@ -32,8 +33,8 @@
                 <option value="">{{ $placeholder }}</option>
             @endif
 
-            @foreach($options as $value => $label)
-                <option value="{{ $value }}">{{ $label }}</option>
+            @foreach($options as $optionValue => $label)
+                <option value="{{ $optionValue }}" @selected((string) $optionValue === (string) $value)>{{ $label }}</option>
             @endforeach
 
             {{ $slot }}
