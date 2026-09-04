@@ -79,14 +79,7 @@
                                 <input type="checkbox" value="{{ $user->id }}" x-model="selected" class="rounded border-gray-300 text-primary-600 focus:ring-primary-500">
                             </td>
                             <td>
-                                <div class="flex items-center gap-3">
-                                    <div class="w-8 h-8 rounded-full bg-primary-100 flex items-center justify-center">
-                                        <span class="text-sm font-medium text-primary-600">{{ substr($user->name, 0, 1) }}</span>
-                                    </div>
-                                    <div>
-                                        <p class="font-medium">{{ $user->name }}</p>
-                                    </div>
-                                </div>
+                                <p class="font-medium">{{ $user->name }}</p>
                             </td>
                             <td>{{ $user->username }}</td>
                             <td>
