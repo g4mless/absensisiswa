@@ -18,10 +18,7 @@
         <div class="lg:col-span-1">
             <x-card>
                 <div class="text-center">
-                    <div class="mx-auto h-20 w-20 rounded-full bg-primary-100 flex items-center justify-center text-2xl font-bold text-primary-700">
-                        {{ substr($student->name ?? 'S', 0, 1) }}
-                    </div>
-                    <h2 class="mt-3 text-lg font-bold text-gray-900">{{ $student->name ?? '-' }}</h2>
+                    <h2 class="text-lg font-bold text-gray-900">{{ $student->name ?? '-' }}</h2>
                     <p class="text-sm text-gray-500">{{ $student->classroom->name ?? '-' }}</p>
                 </div>
 

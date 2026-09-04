@@ -57,12 +57,7 @@
                 @forelse($excuses ?? [] as $excuse)
                     <tr>
                         <td>
-                            <div class="flex items-center gap-3">
-                                <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary-100 text-xs font-semibold text-primary-700">
-                                    {{ substr($excuse->student->name ?? 'S', 0, 1) }}
-                                </div>
-                                <span class="text-sm font-medium text-gray-900">{{ $excuse->student->name ?? '-' }}</span>
-                            </div>
+                            <span class="text-sm font-medium text-gray-900">{{ $excuse->student->name ?? '-' }}</span>
                         </td>
                         <td class="text-sm text-gray-600">{{ $excuse->student->classroom->name ?? '-' }}</td>
                         <td class="text-sm text-gray-600">{{ $excuse->date ? \Carbon\Carbon::parse($excuse->date)->format('d M Y') : '-' }}</td>

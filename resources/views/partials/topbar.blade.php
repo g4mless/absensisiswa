@@ -38,9 +38,6 @@
             @keydown.escape.window="dropdownOpen = false"
             class="flex items-center gap-2 rounded-lg p-1.5 hover:bg-gray-100"
         >
-            <div class="flex h-8 w-8 items-center justify-center rounded-full bg-primary-100 text-sm font-semibold text-primary-700">
-                {{ substr(Auth::user()->name ?? 'U', 0, 1) }}
-            </div>
             <span class="hidden text-sm font-medium text-gray-700 sm:block">{{ Auth::user()->name ?? 'User' }}</span>
             <svg class="hidden h-4 w-4 text-gray-400 sm:block" viewBox="0 0 20 20" fill="currentColor">
                 <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd"/>

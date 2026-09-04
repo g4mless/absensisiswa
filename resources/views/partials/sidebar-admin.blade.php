@@ -113,9 +113,6 @@
     {{-- User info --}}
     <div class="border-t border-gray-200 p-4">
         <div class="flex items-center gap-3">
-            <div class="flex h-9 w-9 items-center justify-center rounded-full bg-primary-100 text-sm font-semibold text-primary-700">
-                {{ substr(Auth::user()->name ?? 'A', 0, 1) }}
-            </div>
             <div class="flex-1 min-w-0">
                 <p class="text-sm font-medium text-gray-900 truncate">{{ Auth::user()->name ?? 'Admin' }}</p>
                 <p class="text-xs text-gray-500 truncate">Administrator</p>

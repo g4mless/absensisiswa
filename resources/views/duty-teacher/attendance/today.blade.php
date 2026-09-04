@@ -52,14 +52,10 @@
                     <tr>
                         <td class="text-gray-500">{{ $index + 1 }}</td>
                         <td>
-                            <div class="flex items-center gap-3">
-                                <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full {{ match($record->status) { 'ALFA' => 'bg-red-100 text-red-700', 'IZIN' => 'bg-yellow-100 text-yellow-700', 'SAKIT' => 'bg-blue-100 text-blue-700', 'HADIR' => 'bg-green-100 text-green-700', default => 'bg-gray-100 text-gray-700' } }} text-xs font-semibold">
-                                    {{ substr($record->student->name ?? '?', 0, 1) }}
-                                </div>
-                                <div class="min-w-0">
-                                    <p class="text-sm font-medium text-gray-900 truncate">{{ $record->student->name ?? '-' }}</p>
-                                    <p class="text-xs text-gray-500 font-mono">{{ $record->student->nis ?? '-' }}</p>
-                                </div>
+                            <div class="min-w-0">
+                                <p class="text-sm font-medium text-gray-900 truncate">{{ $record->student->name ?? '-' }}</p>
+                                <p class="text-xs text-gray-500 font-mono">{{ $record->student->nis ?? '-' }}</p>
+                            </div>
                             </div>
                         </td>
                         <td class="text-sm text-gray-600">{{ $record->student->classroom->name ?? '-' }}</td>

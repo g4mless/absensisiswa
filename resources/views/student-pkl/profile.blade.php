@@ -16,10 +16,7 @@
         <div class="lg:col-span-1">
             <x-card elevated>
                 <div class="flex flex-col items-center text-center">
-                    <div class="flex h-24 w-24 items-center justify-center rounded-full bg-primary-100 text-3xl font-bold text-primary-700">
-                        {{ substr(Auth::user()->name ?? 'P', 0, 1) }}
-                    </div>
-                    <h3 class="mt-4 text-lg font-semibold text-gray-900">{{ $student->user->name ?? '-' }}</h3>
+                    <h3 class="text-lg font-semibold text-gray-900">{{ $student->user->name ?? '-' }}</h3>
                     <p class="text-sm text-gray-500">{{ $student->nis ?? '-' }}</p>
 
                     <div class="mt-6 w-full space-y-3 text-left">

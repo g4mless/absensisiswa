@@ -44,14 +44,9 @@
                 @forelse($studentLocations ?? [] as $location)
                     <tr>
                         <td>
-                            <div class="flex items-center gap-3">
-                                <div class="flex h-8 w-8 items-center justify-center rounded-full bg-primary-100 text-xs font-semibold text-primary-700">
-                                    {{ substr($location->student->user->name ?? 'S', 0, 1) }}
-                                </div>
-                                <div>
-                                    <p class="text-sm font-medium text-gray-900">{{ $location->student->user->name ?? '-' }}</p>
-                                    <p class="text-xs text-gray-500">{{ $location->student->nis ?? '-' }}</p>
-                                </div>
+                            <div>
+                                <p class="text-sm font-medium text-gray-900">{{ $location->student->user->name ?? '-' }}</p>
+                                <p class="text-xs text-gray-500">{{ $location->student->nis ?? '-' }}</p>
                             </div>
                         </td>
                         <td class="text-sm text-gray-600">{{ $location->latitude }}</td>

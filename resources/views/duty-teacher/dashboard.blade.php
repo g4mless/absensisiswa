@@ -27,9 +27,6 @@
                 <div class="space-y-3">
                     @forelse($attendanceIssues ?? [] as $issue)
                         <div class="flex items-center gap-4 rounded-xl border border-gray-100 p-4 hover:bg-gray-50 transition-colors">
-                            <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full {{ match($issue->status) { 'ALFA' => 'bg-red-100 text-red-700', 'IZIN' => 'bg-yellow-100 text-yellow-700', 'SAKIT' => 'bg-blue-100 text-blue-700', default => 'bg-gray-100 text-gray-700' } }}">
-                                {{ substr($issue->student->name ?? '?', 0, 1) }}
-                            </div>
                             <div class="flex-1 min-w-0">
                                 <p class="text-sm font-semibold text-gray-900">{{ $issue->student->name ?? '-' }}</p>
                                 <p class="text-xs text-gray-500">{{ $issue->student->classroom->name ?? '-' }} &middot; {{ $issue->session->subject->name ?? '-' }}</p>

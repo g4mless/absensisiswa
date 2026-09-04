@@ -43,12 +43,7 @@
                 @forelse($students ?? [] as $student)
                     <tr>
                         <td>
-                            <div class="flex items-center gap-3">
-                                <div class="flex h-8 w-8 items-center justify-center rounded-full bg-primary-100 text-xs font-semibold text-primary-700">
-                                    {{ substr($student->user->name ?? 'S', 0, 1) }}
-                                </div>
-                                <span class="font-medium text-gray-900">{{ $student->user->name ?? '-' }}</span>
-                            </div>
+                            <span class="font-medium text-gray-900">{{ $student->user->name ?? '-' }}</span>
                         </td>
                         <td class="text-sm text-gray-600">{{ $student->nis ?? '-' }}</td>
                         <td class="text-sm text-gray-600">{{ $student->pkl->company ?? '-' }}</td>

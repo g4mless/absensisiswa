@@ -23,10 +23,7 @@
         <div class="lg:col-span-1 space-y-6">
             <x-card elevated>
                 <div class="flex flex-col items-center text-center">
-                    <div class="flex h-20 w-20 items-center justify-center rounded-full bg-primary-100 text-2xl font-bold text-primary-700">
-                        {{ substr($student->user->name ?? 'S', 0, 1) }}
-                    </div>
-                    <h3 class="mt-4 text-lg font-semibold text-gray-900">{{ $student->user->name ?? '-' }}</h3>
+                    <h3 class="text-lg font-semibold text-gray-900">{{ $student->user->name ?? '-' }}</h3>
                     <p class="text-sm text-gray-500">{{ $student->nis ?? '-' }}</p>
                 </div>
 

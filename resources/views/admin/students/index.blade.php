@@ -128,14 +128,7 @@
                             </td>
                             <td class="font-mono text-sm">{{ $student->nis }}</td>
                             <td>
-                                <div class="flex items-center gap-3">
-                                    <div class="w-8 h-8 rounded-full bg-success-100 flex items-center justify-center">
-                                        <span class="text-sm font-medium text-success-600">{{ substr($student->name, 0, 1) }}</span>
-                                    </div>
-                                    <div>
-                                        <p class="font-medium">{{ $student->name }}</p>
-                                    </div>
-                                </div>
+                                <p class="font-medium">{{ $student->name }}</p>
                             </td>
                             <td>{{ $student->class->name ?? '-' }}</td>
                             <td>

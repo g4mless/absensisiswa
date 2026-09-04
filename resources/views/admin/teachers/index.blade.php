@@ -145,14 +145,7 @@
                                 </td>
                                 <td class="font-mono text-sm">{{ $teacher->nip }}</td>
                                 <td>
-                                    <div class="flex items-center gap-3">
-                                        <div class="w-8 h-8 rounded-full bg-info-100 flex items-center justify-center">
-                                            <span class="text-sm font-medium text-info-600">{{ substr($teacher->name, 0, 1) }}</span>
-                                        </div>
-                                        <div>
-                                            <p class="font-medium">{{ $teacher->name }}</p>
-                                        </div>
-                                    </div>
+                                    <p class="font-medium">{{ $teacher->name }}</p>
                                 </td>
                                 <td>
                                     <div class="flex flex-wrap gap-1">
