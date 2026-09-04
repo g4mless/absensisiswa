@@ -85,12 +85,6 @@
         <x-alert variant="danger" title="Import gagal" dismissible>{{ session('error') }}</x-alert>
     @endif
 
-    @php
-        $grouped = $teachers->getCollection()->groupBy(function ($teacher) {
-            return $teacher->subjects->first()->name ?? 'Lainnya';
-        });
-    @endphp
-
     <x-card x-data="{
         selected: [],
         allItemIds: {{ $teachers->getCollection()->pluck('id')->toJson() }},
@@ -99,17 +93,6 @@
         },
         set allSelected(value) {
             this.selected = value ? [...this.allItemIds] : [];
-        },
-        toggleCategory(ids) {
-            const allSelected = ids.every(id => this.selected.includes(id));
-            if (allSelected) {
-                this.selected = this.selected.filter(id => !ids.includes(id));
-            } else {
-                this.selected = [...new Set([...this.selected, ...ids])];
-            }
-        },
-        categoryAllSelected(ids) {
-            return ids.length > 0 && ids.every(id => this.selected.includes(id));
         }
     }">
         <div class="mb-4">
@@ -154,23 +137,9 @@
                         <th>Aksi</th>
                     </tr>
                 </thead>
-                @forelse($grouped as $subjectName => $items)
-                    @php $catIds = $items->pluck('id')->toArray(); @endphp
-                    <tbody>
-                        <tr class="bg-gray-50">
-                            <td colspan="6" class="px-4 py-2">
-                                <div class="flex items-center gap-2">
-                                    <input type="checkbox"
-                                           x-effect="$el.checked = categoryAllSelected({{ json_encode($catIds) }})"
-                                           @click.prevent="toggleCategory({{ json_encode($catIds) }})"
-                                           class="rounded border-gray-300 text-primary-600 focus:ring-primary-500">
-                                    <span class="font-semibold text-sm text-gray-700">{{ $subjectName }}</span>
-                                    <span class="text-xs text-gray-500">({{ $items->count() }} guru)</span>
-                                </div>
-                            </td>
-                        </tr>
-                        @foreach($items as $teacher)
-                            <tr>
+                <tbody>
+                    @forelse($teachers as $teacher)
+                        <tr>
                                 <td>
                                     <input type="checkbox" value="{{ $teacher->id }}" x-model="selected" class="rounded border-gray-300 text-primary-600 focus:ring-primary-500">
                                 </td>
@@ -211,18 +180,15 @@
                                         </form>
                                     </div>
                                 </td>
-                            </tr>
-                        @endforeach
-                    </tbody>
-                @empty
-                    <tbody>
+                        </tr>
+                    @empty
                         <tr>
                             <td colspan="6">
                                 <x-empty-state title="Tidak ada guru ditemukan" description="Tidak ada guru yang cocok dengan kriteria pencarian Anda." />
                             </td>
                         </tr>
-                    </tbody>
-                @endforelse
+                    @endforelse
+                </tbody>
             </x-table>
         </div>
 
