@@ -12,35 +12,32 @@ use Maatwebsite\Excel\Row;
 
 class StudentSheetImport implements OnEachRow, WithEvents
 {
-    protected string $sheetName;
-
     protected array $students = [];
-
-    public function __construct(string $sheetName)
-    {
-        $this->sheetName = $sheetName;
-    }
 
     public function onRow(Row $row): void
     {
-        if ($row->getIndex() === 1) {
+        if ($row->getIndex() < 7) {
             return;
         }
 
-        $cellIterator = $row->getDelegate()->getCellIterator('A', 'O');
+        $cellIterator = $row->getDelegate()->getCellIterator('A', 'AQ');
         $cellIterator->setIterateOnlyExistingCells(false);
-        $cells = array_values(iterator_to_array($cellIterator));
-        // D, F, and O are the fixed columns in the Dapodik export.
-        $nisn = $this->cellValue($cells[3] ?? null);
-        $nama = $this->cellValue($cells[5] ?? null);
+        $cells = iterator_to_array($cellIterator);
+        $nisn = $this->cellValue($cells['E'] ?? null);
+        $nama = $this->cellValue($cells['B'] ?? null);
+        $rombel = $this->cellValue($cells['AQ'] ?? null);
 
-        if (empty($nisn) || empty($nama) || str_starts_with($nama, '=')) {
+        if (empty($nisn) || empty($nama) || empty($rombel) || str_starts_with($nama, '=')) {
             return;
         }
 
         $this->students[$nisn] = [
             'name' => $nama,
-            'username' => $nisn,
+            'nis' => $nisn,
+            'rombel' => $rombel,
+            'phone' => $this->cellValue($cells['T'] ?? null)
+                ?: $this->cellValue($cells['S'] ?? null),
+            'address' => $this->cellValue($cells['J'] ?? null),
         ];
     }
 
@@ -48,20 +45,25 @@ class StudentSheetImport implements OnEachRow, WithEvents
     {
         return [
             AfterSheet::class => function () {
-                $this->insertStudents($this->students, $this->getOrCreateClass());
+                $this->insertStudents($this->students);
             },
         ];
     }
 
-    protected function getOrCreateClass(): int
+    protected function getOrCreateClass(string $rombel): int
     {
+        preg_match('/^(\d+)\s+([A-Za-z0-9]+)(?:\s+(.+))?$/', trim($rombel), $parts);
+        $grade = $parts[1] ?? 'X';
+        $code = strtoupper($parts[2] ?? $rombel);
+        $section = trim($parts[3] ?? '1');
+
         $major = Major::firstOrCreate(
-            ['code' => strtoupper($this->sheetName)],
-            ['name' => $this->sheetName]
+            ['code' => $code],
+            ['name' => $code]
         );
 
         $class = ClassModel::firstOrCreate(
-            ['major_id' => $major->id, 'grade' => 'X', 'section' => '1']
+            ['major_id' => $major->id, 'grade' => $grade, 'section' => $section]
         );
 
         return $class->id;
@@ -93,59 +95,54 @@ class StudentSheetImport implements OnEachRow, WithEvents
         return $this->clean($value);
     }
 
-    protected function insertStudents(array $students, int $classId): void
+    protected function insertStudents(array $students): void
     {
         if ($students === []) {
             return;
         }
 
-        $now = now();
-        $usernames = array_keys($students);
-        $existing = DB::table('users')
-            ->whereIn('username', $usernames)
-            ->pluck('username')
-            ->all();
-        $existing = array_fill_keys($existing, true);
+        DB::transaction(function () use ($students) {
+            foreach ($students as $student) {
+                $classId = $this->getOrCreateClass($student['rombel']);
+                $existingStudent = DB::table('students')->where('nis', $student['nis'])->first();
+                $now = now();
 
-        $users = [];
-        foreach ($students as $student) {
-            if (isset($existing[$student['username']])) {
-                continue;
-            }
+                if ($existingStudent) {
+                    DB::table('users')->where('id', $existingStudent->user_id)->update([
+                        'name' => $student['name'],
+                        'username' => $student['nis'],
+                        'updated_at' => $now,
+                    ]);
+                    DB::table('students')->where('id', $existingStudent->id)->update([
+                        'class_id' => $classId,
+                        'phone' => $student['phone'] ?: null,
+                        'address' => $student['address'] ?: null,
+                        'updated_at' => $now,
+                    ]);
+                    continue;
+                }
 
-            // Imported passwords are migrated to bcrypt on the first login.
-            $users[] = $student + [
-                'role' => 'siswa',
-                'password' => $student['username'],
-                'created_at' => $now,
-                'updated_at' => $now,
-            ];
-        }
+                $userId = DB::table('users')->insertGetId([
+                    'name' => $student['name'],
+                    'username' => $student['nis'],
+                    'role' => 'siswa',
+                    // Password is upgraded to bcrypt after the student's first login.
+                    'password' => $student['nis'],
+                    'created_at' => $now,
+                    'updated_at' => $now,
+                ]);
 
-        if ($users === []) {
-            return;
-        }
-
-        DB::transaction(function () use ($users, $classId) {
-            DB::table('users')->insert($users);
-
-            $ids = DB::table('users')
-                ->whereIn('username', array_column($users, 'username'))
-                ->pluck('id', 'username');
-
-            $studentRows = [];
-            foreach ($users as $user) {
-                $studentRows[] = [
-                    'user_id' => $ids[$user['username']],
-                    'nis' => $user['username'],
+                DB::table('students')->insert([
+                    'user_id' => $userId,
+                    'nis' => $student['nis'],
                     'class_id' => $classId,
+                    'phone' => $student['phone'] ?: null,
+                    'address' => $student['address'] ?: null,
                     'is_pkl' => false,
-                    'created_at' => $user['created_at'],
-                    'updated_at' => $user['updated_at'],
-                ];
+                    'created_at' => $now,
+                    'updated_at' => $now,
+                ]);
             }
-
-            DB::table('students')->insert($studentRows);
         });
     }
 }

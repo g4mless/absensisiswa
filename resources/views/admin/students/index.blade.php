@@ -39,12 +39,12 @@
                             <form action="{{ route('admin.students.import') }}" method="POST" enctype="multipart/form-data" x-data="{ submitting: false }" x-on:submit="submitting = true">
                                 @csrf
                                 <div class="mb-4 space-y-2">
-                                    <p class="text-sm text-gray-500">Format file: .XLS (Excel 97-2003)</p>
-                                    <p class="text-sm text-gray-500">Sheet per jurusan: TKJ, TSM, TITL, DKV, DPB, MP</p>
-                                    <p class="text-sm text-gray-500">Kolom yang dibutuhkan:</p>
+                                    <p class="text-sm text-gray-500">Format file: .XLSX export Dapodik, satu sheet</p>
+                                    <p class="text-sm text-gray-500">Kolom yang digunakan:</p>
                                     <ul class="text-xs text-gray-400 list-disc list-inside space-y-0.5">
-                                        <li><strong>D</strong> - NISN</li>
-                                        <li><strong>F</strong> - Nama Siswa</li>
+                                        <li><strong>B</strong> - Nama Siswa</li>
+                                        <li><strong>E</strong> - NISN</li>
+                                        <li><strong>AQ</strong> - Rombel/Kelas</li>
                                     </ul>
                                     <x-file-upload name="file" label="Pilih File Excel" accept=".xls,.xlsx" required :error="$errors->first('file')" />
                                 </div>
