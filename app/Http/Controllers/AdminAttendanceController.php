@@ -16,7 +16,7 @@ class AdminAttendanceController extends Controller
             ->when($request->filled('class_id'), fn ($query) => $query->whereHas('student', fn ($student) => $student->where('class_id', $request->input('class_id'))))
             ->orderByDesc('date');
         $attendances = $query->paginate(15);
-        $classes = ClassModel::orderBy('name')->get();
+        $classes = ClassModel::with('major')->orderBy('grade')->orderBy('major_id')->orderBy('section')->get();
         return view('admin.attendance.index', compact('attendances', 'classes', 'date'));
     }
 }

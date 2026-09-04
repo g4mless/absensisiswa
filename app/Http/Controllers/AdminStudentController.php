@@ -14,17 +14,23 @@ use Maatwebsite\Excel\Facades\Excel;
 
 class AdminStudentController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $students = Student::with(['user', 'class'])->orderBy('nis')->paginate(15);
-        $classes = ClassModel::orderBy('name')->get();
+        $students = Student::with(['user', 'class'])
+            ->when($request->filled('search'), fn ($query) => $query
+                ->where('nis', 'like', '%'.$request->input('search').'%')
+                ->orWhereHas('user', fn ($user) => $user->where('name', 'like', '%'.$request->input('search').'%')))
+            ->orderBy('nis')
+            ->paginate(15)
+            ->withQueryString();
+        $classes = ClassModel::with('major')->orderBy('grade')->orderBy('major_id')->orderBy('section')->get();
 
         return view('admin.students.index', compact('students', 'classes'));
     }
 
     public function create()
     {
-        $classes = ClassModel::orderBy('name')->get();
+        $classes = ClassModel::with('major')->orderBy('grade')->orderBy('major_id')->orderBy('section')->get();
 
         return view('admin.students.create', compact('classes'));
     }
@@ -72,7 +78,7 @@ class AdminStudentController extends Controller
     public function edit($id)
     {
         $student = Student::findOrFail($id);
-        $classes = ClassModel::orderBy('name')->get();
+        $classes = ClassModel::with('major')->orderBy('grade')->orderBy('major_id')->orderBy('section')->get();
 
         return view('admin.students.edit', compact('student', 'classes'));
     }

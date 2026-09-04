@@ -20,7 +20,7 @@ class HomeroomTeacherController extends Controller
     {
         return view('admin.homeroom-teachers.create', [
             'teachers' => Teacher::with('user')->orderBy('nip')->get(),
-            'classes' => ClassModel::orderBy('name')->get(),
+            'classes' => ClassModel::with('major')->orderBy('grade')->orderBy('major_id')->orderBy('section')->get(),
         ]);
     }
 

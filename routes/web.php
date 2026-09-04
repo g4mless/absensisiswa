@@ -43,6 +43,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
     Route::post('teachers/bulk-destroy', [AdminTeacherController::class, 'bulkDestroy'])->name('teachers.bulk-destroy');
     Route::post('teachers/all-destroy', [AdminTeacherController::class, 'allDestroy'])->name('teachers.all-destroy');
     Route::post('teachers/import', [AdminTeacherController::class, 'import'])->name('teachers.import');
+    Route::post('teachers/import/sheets', [AdminTeacherController::class, 'importSheets'])->name('teachers.import.sheets');
     Route::resource('teachers', AdminTeacherController::class);
     Route::resource('classes', ClassController::class);
     Route::post('classes/bulk-destroy', [ClassController::class, 'bulkDestroy'])->name('classes.bulk-destroy');

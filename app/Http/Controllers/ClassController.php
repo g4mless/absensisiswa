@@ -3,35 +3,45 @@
 namespace App\Http\Controllers;
 
 use App\Models\ClassModel;
+use App\Models\Major;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class ClassController extends Controller
 {
     public function index(Request $request)
     {
-        $query = ClassModel::query();
+        $query = ClassModel::with('major');
 
         if ($search = $request->input('search')) {
             $query->where(function ($q) use ($search) {
-                $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('major', 'like', "%{$search}%");
+                $q->where('grade', 'like', "%{$search}%")
+                    ->orWhere('section', 'like', "%{$search}%")
+                    ->orWhereHas('major', fn ($major) => $major
+                        ->where('name', 'like', "%{$search}%")
+                        ->orWhere('code', 'like', "%{$search}%"));
             });
         }
 
-        $classes = $query->orderBy('name')->paginate(15)->withQueryString();
+        $classes = $query->orderByRaw("FIELD(grade, 'X', 'XI', 'XII')")
+            ->orderBy('major_id')
+            ->orderBy('section')
+            ->paginate(15)
+            ->withQueryString();
         return view('admin.classes.index', compact('classes'));
     }
 
     public function create()
     {
-        return view('admin.classes.create');
+        return view('admin.classes.create', ['majors' => Major::orderBy('name')->get()]);
     }
 
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'major' => ['required', 'string', 'max:255'],
+            'major_id' => ['required', 'exists:majors,id'],
+            'grade' => ['required', Rule::in(['X', 'XI', 'XII'])],
+            'section' => ['required', 'string', 'max:20'],
         ]);
 
         ClassModel::create($validated);
@@ -48,15 +58,19 @@ class ClassController extends Controller
     public function edit($id)
     {
         $class = ClassModel::findOrFail($id);
-        return view('admin.classes.edit', compact('class'));
+        return view('admin.classes.edit', [
+            'class' => $class,
+            'majors' => Major::orderBy('name')->get(),
+        ]);
     }
 
     public function update(Request $request, $id)
     {
         $class = ClassModel::findOrFail($id);
         $validated = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'major' => ['required', 'string', 'max:255'],
+            'major_id' => ['required', 'exists:majors,id'],
+            'grade' => ['required', Rule::in(['X', 'XI', 'XII'])],
+            'section' => ['required', 'string', 'max:20'],
         ]);
 
         $class->update($validated);

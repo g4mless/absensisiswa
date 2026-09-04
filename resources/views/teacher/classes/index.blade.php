@@ -19,7 +19,7 @@
                 <div class="flex items-start justify-between">
                     <div class="min-w-0 flex-1">
                         <h3 class="text-lg font-bold text-gray-900">{{ $class->name }}</h3>
-                        <p class="mt-1 text-sm text-gray-500">{{ $class->major ?? '-' }}</p>
+                        <p class="mt-1 text-sm text-gray-500">{{ $class->major?->code ?? '-' }}</p>
                     </div>
                     <x-badge variant="info">{{ $class->students_count ?? 0 }} siswa</x-badge>
                 </div>

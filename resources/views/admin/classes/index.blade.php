@@ -24,7 +24,7 @@
     @endif
 
     @php
-        $grouped = $classes->getCollection()->groupBy('major');
+        $grouped = $classes->getCollection()->groupBy(fn ($class) => $class->major?->name ?? 'Lainnya');
     @endphp
 
     <x-card x-data="{
@@ -111,7 +111,7 @@
                                 </td>
                                 <td class="font-medium">{{ $class->name }}</td>
                                 <td>
-                                    <x-badge variant="info">{{ $class->major ?? '-' }}</x-badge>
+                                    <x-badge variant="info">{{ $class->major?->code ?? '-' }}</x-badge>
                                 </td>
                                 <td>{{ $class->homeroomTeacher?->teacher?->name ?? '-' }}</td>
                                 <td>

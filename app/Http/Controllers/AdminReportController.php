@@ -12,7 +12,7 @@ class AdminReportController extends Controller
 {
     public function index()
     {
-        $classes = ClassModel::orderBy('name')->get();
+        $classes = ClassModel::with('major')->orderBy('grade')->orderBy('major_id')->orderBy('section')->get();
         $reportData = ['students' => []];
         return view('admin.reports.index', compact('classes', 'reportData'));
     }

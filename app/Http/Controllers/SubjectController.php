@@ -7,9 +7,14 @@ use Illuminate\Http\Request;
 
 class SubjectController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $subjects = Subject::orderBy('name')->paginate(15);
+        $subjects = Subject::when($request->filled('search'), fn ($query) => $query
+            ->where('name', 'like', '%'.$request->input('search').'%')
+            ->orWhere('code', 'like', '%'.$request->input('search').'%'))
+            ->orderBy('name')
+            ->paginate(15)
+            ->withQueryString();
         return view('admin.subjects.index', compact('subjects'));
     }
 

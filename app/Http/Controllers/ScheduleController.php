@@ -14,7 +14,7 @@ class ScheduleController extends Controller
     public function index()
     {
         $schedules = Schedule::with(['class', 'subject', 'teacher.user'])->orderBy('day')->paginate(15);
-        $classes = ClassModel::orderBy('name')->get();
+        $classes = ClassModel::with('major')->orderBy('grade')->orderBy('major_id')->orderBy('section')->get();
         return view('admin.schedules.index', compact('schedules', 'classes'));
     }
 
@@ -23,7 +23,7 @@ class ScheduleController extends Controller
         return view('admin.schedules.create', [
             'subjects' => Subject::orderBy('name')->get(),
             'teachers' => Teacher::with('user')->orderBy('nip')->get(),
-            'classes' => ClassModel::orderBy('name')->get(),
+            'classes' => ClassModel::with('major')->orderBy('grade')->orderBy('major_id')->orderBy('section')->get(),
         ]);
     }
 
@@ -46,7 +46,7 @@ class ScheduleController extends Controller
             'schedule' => $schedule,
             'subjects' => Subject::orderBy('name')->get(),
             'teachers' => Teacher::with('user')->orderBy('nip')->get(),
-            'classes' => ClassModel::orderBy('name')->get(),
+            'classes' => ClassModel::with('major')->orderBy('grade')->orderBy('major_id')->orderBy('section')->get(),
         ]);
     }
 

@@ -10,7 +10,19 @@ class ClassModel extends Model
     use HasFactory;
 
     protected $table = 'classes';
-    protected $fillable = ['name', 'major'];
+    protected $fillable = ['major_id', 'grade', 'section'];
+
+    protected $appends = ['name'];
+
+    public function major()
+    {
+        return $this->belongsTo(Major::class);
+    }
+
+    public function getNameAttribute(): string
+    {
+        return trim("{$this->grade} {$this->major?->code} {$this->section}");
+    }
 
     public function students()
     {

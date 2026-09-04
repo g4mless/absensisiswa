@@ -14,7 +14,7 @@
                 <span class="text-sm font-medium text-gray-900">{{ $class->name ?? '-' }}</span>
             </div>
             <h1 class="text-2xl font-bold text-gray-900">{{ $class->name ?? '-' }}</h1>
-            <p class="text-gray-500">{{ $class->major ?? '' }} &middot; {{ $class->students_count ?? 0 }} siswa</p>
+            <p class="text-gray-500">{{ $class->major?->code ?? '' }} &middot; {{ $class->students_count ?? 0 }} siswa</p>
         </div>
         <div class="flex gap-2">
             <a href="{{ route('teacher.attendance') }}?class={{ $class->id }}">

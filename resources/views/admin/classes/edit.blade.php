@@ -16,8 +16,9 @@
             @csrf
             @method('PUT')
             <div class="space-y-4">
-                <x-input label="Nama Kelas" name="name" :error="$errors->first('name')" value="{{ old('name', $class->name) }}" placeholder="contoh: XII RPL 1" />
-                <x-input label="Jurusan" name="major" :error="$errors->first('major')" value="{{ old('major', $class->major) }}" placeholder="contoh: RPL" />
+                <x-select label="Tingkat" name="grade" :options="['X' => 'X', 'XI' => 'XI', 'XII' => 'XII']" :error="$errors->first('grade')" value="{{ old('grade', $class->grade) }}" placeholder="Pilih tingkat" />
+                <x-select label="Jurusan" name="major_id" :options="$majors->pluck('name', 'id')->toArray()" :error="$errors->first('major_id')" value="{{ old('major_id', $class->major_id) }}" placeholder="Pilih jurusan" />
+                <x-input label="Rombel" name="section" :error="$errors->first('section')" value="{{ old('section', $class->section) }}" placeholder="contoh: 1" />
             </div>
             <div class="flex items-center gap-3 mt-6">
                 <x-button variant="primary" type="submit">Perbarui Kelas</x-button>

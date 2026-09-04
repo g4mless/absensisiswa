@@ -11,12 +11,25 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
 use Maatwebsite\Excel\Facades\Excel;
+use PhpOffice\PhpSpreadsheet\IOFactory;
+use Throwable;
 
 class AdminTeacherController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $teachers = Teacher::with(['user', 'subjects', 'programHead.major'])->orderBy('nip')->paginate(15);
+        $query = Teacher::with(['user', 'subjects', 'programHead.major']);
+
+        if ($search = trim($request->input('search', ''))) {
+            $query->where(function ($query) use ($search) {
+                $query->where('nip', 'like', "%{$search}%")
+                    ->orWhereHas('user', fn ($user) => $user
+                        ->where('name', 'like', "%{$search}%")
+                        ->orWhere('username', 'like', "%{$search}%"));
+            });
+        }
+
+        $teachers = $query->orderBy('nip')->paginate(15)->withQueryString();
         return view('admin.teachers.index', compact('teachers'));
     }
 
@@ -112,13 +125,31 @@ class AdminTeacherController extends Controller
     public function import(Request $request)
     {
         $request->validate([
-            'file' => ['required', 'file', 'mimes:xlsx,xls,csv'],
+            'file' => ['required', 'file', 'mimes:xlsx'],
+            'sheets' => ['required', 'array'],
+            'sheets.*' => ['string'],
         ]);
 
-        Excel::import(new TeacherImport, $request->file('file'));
+        try {
+            $result = (new TeacherImport)->import($request->file('file'), $request->input('sheets'));
+        } catch (Throwable $exception) {
+            return redirect()->route('admin.teachers.index')
+                ->with('error', $exception->getMessage());
+        }
 
         return redirect()->route('admin.teachers.index')
-            ->with('status', 'Data guru berhasil diimpor.');
+            ->with('success', "{$result['teachers']} guru, relasi mapel/kelas, dan jadwal berhasil diimpor.");
+    }
+
+    public function importSheets(Request $request)
+    {
+        $request->validate(['file' => ['required', 'file', 'mimes:xlsx']]);
+
+        $reader = IOFactory::createReaderForFile($request->file('file')->getRealPath());
+
+        return response()->json([
+            'sheets' => $reader->listWorksheetNames($request->file('file')->getRealPath()),
+        ]);
     }
 
     public function export()

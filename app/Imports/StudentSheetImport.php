@@ -3,6 +3,7 @@
 namespace App\Imports;
 
 use App\Models\ClassModel;
+use App\Models\Major;
 use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Concerns\OnEachRow;
 use Maatwebsite\Excel\Concerns\WithEvents;
@@ -54,11 +55,13 @@ class StudentSheetImport implements OnEachRow, WithEvents
 
     protected function getOrCreateClass(): int
     {
-        $className = 'X '.$this->sheetName;
+        $major = Major::firstOrCreate(
+            ['code' => strtoupper($this->sheetName)],
+            ['name' => $this->sheetName]
+        );
 
         $class = ClassModel::firstOrCreate(
-            ['name' => $className, 'major' => $this->sheetName],
-            ['name' => $className, 'major' => $this->sheetName]
+            ['major_id' => $major->id, 'grade' => 'X', 'section' => '1']
         );
 
         return $class->id;

@@ -26,9 +26,11 @@ return new class extends Migration
 
         Schema::create('classes', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
-            $table->string('major');
+            $table->foreignId('major_id')->constrained()->restrictOnDelete();
+            $table->string('grade', 10);
+            $table->string('section', 20);
             $table->timestamps();
+            $table->unique(['major_id', 'grade', 'section']);
         });
 
         Schema::create('teachers', function (Blueprint $table) {
@@ -55,6 +57,7 @@ return new class extends Migration
             $table->foreignId('subject_id')->constrained()->cascadeOnDelete();
             $table->foreignId('class_id')->constrained()->cascadeOnDelete();
             $table->timestamps();
+            $table->unique(['teacher_id', 'subject_id', 'class_id']);
         });
 
         Schema::create('schedules', function (Blueprint $table) {
@@ -67,6 +70,7 @@ return new class extends Migration
             $table->time('end_time');
             $table->string('room')->nullable();
             $table->timestamps();
+            $table->unique(['class_id', 'day', 'start_time', 'end_time']);
         });
 
         Schema::create('homeroom_teachers', function (Blueprint $table) {
@@ -74,6 +78,7 @@ return new class extends Migration
             $table->foreignId('teacher_id')->constrained()->cascadeOnDelete();
             $table->foreignId('class_id')->constrained()->cascadeOnDelete();
             $table->timestamps();
+            $table->unique('class_id');
         });
 
         Schema::create('program_heads', function (Blueprint $table) {
@@ -81,6 +86,7 @@ return new class extends Migration
             $table->foreignId('teacher_id')->constrained()->cascadeOnDelete();
             $table->foreignId('major_id')->constrained()->cascadeOnDelete();
             $table->timestamps();
+            $table->unique('major_id');
         });
 
         Schema::create('pkl_supervisors', function (Blueprint $table) {

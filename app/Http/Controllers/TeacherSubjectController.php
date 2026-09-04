@@ -22,7 +22,7 @@ class TeacherSubjectController extends Controller
         return view('admin.teacher-subjects.create', [
             'teachers' => Teacher::with('user')->orderBy('nip')->get(),
             'subjects' => Subject::orderBy('name')->get(),
-            'classes' => ClassModel::orderBy('name')->get(),
+            'classes' => ClassModel::with('major')->orderBy('grade')->orderBy('major_id')->orderBy('section')->get(),
         ]);
     }
 
@@ -32,7 +32,7 @@ class TeacherSubjectController extends Controller
             'assignment' => TeacherSubject::findOrFail($id),
             'teachers' => Teacher::with('user')->orderBy('nip')->get(),
             'subjects' => Subject::orderBy('name')->get(),
-            'classes' => ClassModel::orderBy('name')->get(),
+            'classes' => ClassModel::with('major')->orderBy('grade')->orderBy('major_id')->orderBy('section')->get(),
         ]);
     }
 
