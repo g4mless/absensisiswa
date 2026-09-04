@@ -6,12 +6,11 @@ use App\Models\Teacher;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
-use Maatwebsite\Excel\Concerns\Import;
 use Maatwebsite\Excel\Concerns\ToModel;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use Maatwebsite\Excel\Concerns\WithValidation;
 
-class TeacherImport implements Import, ToModel, WithHeadingRow, WithValidation
+class TeacherImport implements ToModel, WithHeadingRow, WithValidation
 {
     public function model(array $row)
     {
