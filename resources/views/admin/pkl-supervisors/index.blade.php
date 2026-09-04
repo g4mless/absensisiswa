@@ -64,6 +64,7 @@
                         </th>
                         <th>Pembimbing PKL</th>
                         <th>Perusahaan/Tempat</th>
+                        <th>Alamat Perusahaan</th>
                         <th>Nomor Kontak</th>
                         <th>Aksi</th>
                     </tr>
@@ -76,6 +77,7 @@
                             </td>
                             <td class="font-medium">{{ $assignment->supervisor_name }}</td>
                             <td>{{ $assignment->company_name ?? '-' }}</td>
+                            <td class="max-w-xs whitespace-normal">{{ $assignment->company_address ?? '-' }}</td>
                             <td>{{ $assignment->contact_phone ?? '-' }}</td>
                             <td>
                                 <div class="flex items-center gap-2">
@@ -92,7 +94,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="5">
+                            <td colspan="6">
                                 <x-empty-state title="Tidak ada penugasan ditemukan" description="Mulai dengan menugaskan pembimbing PKL." />
                             </td>
                         </tr>
