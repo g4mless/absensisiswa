@@ -77,4 +77,10 @@ class ClassController extends Controller
         $count = ClassModel::whereIn('id', $request->ids)->delete();
         return redirect()->route('admin.classes.index')->with('success', $count . ' kelas berhasil dihapus.');
     }
+
+    public function allDestroy()
+    {
+        $count = ClassModel::query()->delete();
+        return redirect()->route('admin.classes.index')->with('success', $count . ' kelas berhasil dihapus.');
+    }
 }

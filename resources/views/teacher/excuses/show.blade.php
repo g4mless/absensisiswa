@@ -7,7 +7,7 @@
 @section('content')
 <div class="space-y-6">
     <div class="flex items-center gap-2 mb-1">
-        <a href="{{ route('teacher.excuses.index') }}" class="text-sm text-gray-500 hover:text-primary-600 transition-colors">Surat Izin</a>
+        <a href="{{ route('teacher.excuses') }}" class="text-sm text-gray-500 hover:text-primary-600 transition-colors">Surat Izin</a>
         <svg class="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5"/></svg>
         <span class="text-sm font-medium text-gray-900">Detail</span>
     </div>

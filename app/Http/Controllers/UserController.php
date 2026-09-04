@@ -80,4 +80,11 @@ class UserController extends Controller
         $count = User::whereIn('id', $request->ids)->delete();
         return redirect()->route('admin.users.index')->with('status', $count . ' pengguna berhasil dihapus.');
     }
+
+    public function allDestroy()
+    {
+        $count = User::count();
+        User::query()->delete();
+        return redirect()->route('admin.users.index')->with('status', $count . ' pengguna berhasil dihapus.');
+    }
 }

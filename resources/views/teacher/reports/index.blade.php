@@ -14,7 +14,7 @@
     <x-card>
         <x-slot name="header">Filter Laporan</x-slot>
 
-        <form method="GET" action="{{ route('teacher.reports.index') }}" class="space-y-4">
+        <form method="GET" action="{{ route('teacher.reports') }}" class="space-y-4">
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <x-select label="Jenis Laporan" name="type" :options="['daily' => 'Harian', 'weekly' => 'Mingguan', 'monthly' => 'Bulanan']" :value="$reportType ?? 'daily'" />
                 <x-input label="Tanggal Mulai" name="start_date" type="date" :value="$startDate ?? date('Y-m-d')" />
@@ -27,20 +27,6 @@
                     <svg class="h-4 w-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"/></svg>
                     Tampilkan
                 </x-button>
-                @if(isset($reportData))
-                    <a href="{{ route('teacher.reports.export', array_merge(request()->query(), ['format' => 'csv'])) }}">
-                        <x-button variant="secondary" size="md">
-                            <svg class="h-4 w-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3"/></svg>
-                            CSV
-                        </x-button>
-                    </a>
-                    <a href="{{ route('teacher.reports.export', array_merge(request()->query(), ['format' => 'xlsx'])) }}">
-                        <x-button variant="secondary" size="md">
-                            <svg class="h-4 w-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3"/></svg>
-                            XLSX
-                        </x-button>
-                    </a>
-                @endif
             </div>
         </form>
     </x-card>

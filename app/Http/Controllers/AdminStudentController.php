@@ -122,6 +122,17 @@ class AdminStudentController extends Controller
         return redirect()->route('admin.students.index')->with('status', count($students) . ' siswa berhasil dihapus.');
     }
 
+    public function allDestroy()
+    {
+        $students = Student::with('user')->get();
+        DB::transaction(function () use ($students) {
+            foreach ($students as $student) {
+                $student->user?->delete();
+            }
+        });
+        return redirect()->route('admin.students.index')->with('status', $students->count() . ' siswa berhasil dihapus.');
+    }
+
     public function import(Request $request)
     {
         $request->validate([

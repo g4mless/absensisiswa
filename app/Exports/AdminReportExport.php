@@ -4,13 +4,14 @@ namespace App\Exports;
 
 use App\Models\Attendance;
 use Illuminate\Support\Collection;
+use Maatwebsite\Excel\Concerns\Export;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
 use Maatwebsite\Excel\Concerns\WithStyles;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
-class AdminReportExport implements FromCollection, WithHeadings, WithMapping, WithStyles
+class AdminReportExport implements Export, FromCollection, WithHeadings, WithMapping, WithStyles
 {
     public function __construct(private readonly array $filters)
     {
@@ -33,7 +34,7 @@ class AdminReportExport implements FromCollection, WithHeadings, WithMapping, Wi
         return ['Tanggal', 'Siswa', 'Kelas', 'Status', 'Jam Masuk', 'Catatan'];
     }
 
-    public function map($attendance): array
+    public function map(mixed $attendance): array
     {
         return [
             $attendance->attendanceSession?->date,
@@ -45,7 +46,7 @@ class AdminReportExport implements FromCollection, WithHeadings, WithMapping, Wi
         ];
     }
 
-    public function styles(Worksheet $sheet): array
+    public function styles(Worksheet $sheet): ?array
     {
         return [1 => ['font' => ['bold' => true]]];
     }

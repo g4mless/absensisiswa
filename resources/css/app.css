@@ -491,3 +491,204 @@
     color: #6b7280;
     margin-top: 0.25rem;
 }
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        color-scheme: dark;
+    }
+
+    html,
+    body,
+    [class~="bg-gray-50"] {
+        background-color: #0a0a0a !important;
+    }
+
+    [class~="bg-white"] {
+        background-color: #171717 !important;
+    }
+
+    [class~="bg-white/80"] {
+        background-color: rgb(23 23 23 / 0.8) !important;
+    }
+
+    [class~="bg-gray-100"] {
+        background-color: #262626 !important;
+    }
+
+    [class~="bg-gray-200"] {
+        background-color: #404040 !important;
+    }
+
+    [class~="text-gray-900"],
+    [class~="text-gray-800"] {
+        color: #f5f5f5 !important;
+    }
+
+    [class~="text-gray-700"] {
+        color: #d4d4d4 !important;
+    }
+
+    [class~="text-gray-600"] {
+        color: #a3a3a3 !important;
+    }
+
+    [class~="text-gray-500"] {
+        color: #a3a3a3 !important;
+    }
+
+    [class~="text-gray-400"] {
+        color: #737373 !important;
+    }
+
+    [class~="border-gray-100"] {
+        border-color: #262626 !important;
+    }
+
+    [class~="border-gray-200"] {
+        border-color: #404040 !important;
+    }
+
+    [class~="border-gray-300"] {
+        border-color: #525252 !important;
+    }
+
+    [class~="hover:bg-gray-50"]:hover {
+        background-color: #262626 !important;
+    }
+
+    [class~="hover:bg-gray-100"]:hover {
+        background-color: #404040 !important;
+    }
+
+    [class~="hover:bg-gray-200"]:hover {
+        background-color: #525252 !important;
+    }
+
+    .md-card,
+    .md-elevated,
+    .md-stat-card {
+        background-color: #171717;
+        border-color: #262626;
+        color: #f5f5f5;
+    }
+
+    .md-btn:focus,
+    .md-btn-primary:focus,
+    .md-btn-secondary:focus,
+    .md-btn-danger:focus,
+    .md-btn-success:focus,
+    .md-btn-warning:focus,
+    .md-btn-ghost:focus {
+        box-shadow: 0 0 0 2px #171717, 0 0 0 4px #a3a3a3;
+    }
+
+    .md-btn-secondary {
+        background-color: #404040;
+        color: #f5f5f5;
+    }
+
+    .md-btn-secondary:hover,
+    .md-btn-ghost:hover {
+        background-color: #525252;
+    }
+
+    .md-btn-ghost {
+        color: #d4d4d4;
+    }
+
+    .md-input,
+    .md-select,
+    .md-textarea {
+        border-color: #525252;
+        background-color: #171717;
+        color: #f5f5f5;
+    }
+
+    .md-input::placeholder,
+    .md-textarea::placeholder {
+        color: #737373;
+    }
+
+    .md-label,
+    .md-table th,
+    .md-page-title {
+        color: #f5f5f5;
+    }
+
+    .md-page-subtitle {
+        color: #a3a3a3;
+    }
+
+    .md-badge-success,
+    .md-badge-warning,
+    .md-badge-danger,
+    .md-badge-info,
+    .md-badge-neutral {
+        background-color: #262626;
+        color: #d4d4d4;
+        box-shadow: inset 0 0 0 1px #525252;
+    }
+
+    .md-table thead,
+    .md-table tbody tr:hover {
+        background-color: #262626;
+    }
+
+    .md-table th {
+        border-color: #525252;
+    }
+
+    .md-table td {
+        border-color: #262626;
+        color: #d4d4d4;
+    }
+
+    .md-divider {
+        border-color: #404040;
+    }
+
+    .md-sidebar-link {
+        color: #a3a3a3;
+    }
+
+    .md-sidebar-link:hover,
+    .md-sidebar-link-active {
+        background-color: #262626;
+        color: #f5f5f5;
+    }
+
+    [class~="bg-primary-50"],
+    [class~="bg-green-50"],
+    [class~="bg-red-50"],
+    [class~="bg-yellow-50"],
+    [class~="bg-blue-50"] {
+        background-color: #262626 !important;
+    }
+
+    [class~="bg-primary-100"] {
+        background-color: #404040 !important;
+    }
+
+    [class~="text-primary-700"],
+    [class~="text-primary-600"] {
+        color: #d4d4d4 !important;
+    }
+
+    [class~="text-green-800"],
+    [class~="text-red-800"],
+    [class~="text-yellow-800"],
+    [class~="text-blue-800"] {
+        color: #f5f5f5 !important;
+    }
+
+    [class~="text-green-700"],
+    [class~="text-red-700"],
+    [class~="text-yellow-700"],
+    [class~="text-blue-700"] {
+        color: #d4d4d4 !important;
+    }
+
+    [class~="border-b-gray-100"] {
+        border-color: #262626 !important;
+    }
+}

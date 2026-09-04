@@ -59,4 +59,10 @@ class SubjectController extends Controller
         $count = Subject::whereIn('id', $request->ids)->delete();
         return redirect()->route('admin.subjects.index')->with('status', $count . ' mata pelajaran berhasil dihapus.');
     }
+
+    public function allDestroy()
+    {
+        $count = Subject::query()->delete();
+        return redirect()->route('admin.subjects.index')->with('status', $count . ' mata pelajaran berhasil dihapus.');
+    }
 }

@@ -49,16 +49,16 @@
             <x-card>
                 <x-slot name="header">Aksi Cepat</x-slot>
                 <div class="space-y-3">
-                    <a href="{{ route('teacher.attendance.index') }}" class="block">
+                    <a href="{{ route('teacher.attendance') }}" class="block">
                         <x-button variant="primary" class="w-full">Input Absensi</x-button>
                     </a>
-                    <a href="{{ route('teacher.excuses.index') }}" class="block">
+                    <a href="{{ route('teacher.excuses') }}" class="block">
                         <x-button variant="warning" class="w-full">Lihat Surat Izin</x-button>
                     </a>
-                    <a href="{{ route('teacher.reports.index') }}" class="block">
+                    <a href="{{ route('teacher.reports') }}" class="block">
                         <x-button variant="secondary" class="w-full">Buat Laporan</x-button>
                     </a>
-                    <a href="{{ route('teacher.classes.index') }}" class="block">
+                    <a href="{{ route('teacher.classes') }}" class="block">
                         <x-button variant="ghost" class="w-full">Lihat Kelas</x-button>
                     </a>
                 </div>

@@ -7,7 +7,7 @@
 @section('content')
 <div class="space-y-6">
     <div class="flex items-center gap-2 mb-1">
-        <a href="{{ route('teacher.classes.index') }}" class="text-sm text-gray-500 hover:text-primary-600 transition-colors">Kelas</a>
+        <a href="{{ route('teacher.classes') }}" class="text-sm text-gray-500 hover:text-primary-600 transition-colors">Kelas</a>
         <svg class="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5"/></svg>
         <a href="{{ route('teacher.classes.show', $student->classroom->id ?? 0) }}" class="text-sm text-gray-500 hover:text-primary-600 transition-colors">{{ $student->classroom->name ?? '-' }}</a>
         <svg class="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5"/></svg>

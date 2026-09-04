@@ -95,6 +95,12 @@ class TeacherSubjectController extends Controller
         return redirect()->route('admin.teacher-subjects.index')->with('status', $count . ' penugasan berhasil dihapus.');
     }
 
+    public function allDestroy()
+    {
+        $count = TeacherSubject::query()->delete();
+        return redirect()->route('admin.teacher-subjects.index')->with('status', $count . ' penugasan berhasil dihapus.');
+    }
+
     private function findTeacherByName(string $name): ?Teacher
     {
         return Teacher::whereHas('user', function ($query) use ($name) {

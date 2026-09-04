@@ -1,14 +1,16 @@
 {{-- Topbar --}}
 <header class="sticky top-0 z-30 flex h-16 items-center gap-4 border-b border-gray-200 bg-white/80 px-4 backdrop-blur-sm sm:px-6" x-data="{ dropdownOpen: false }">
-    {{-- Mobile hamburger --}}
-    <button
-        @click="sidebarOpen = !sidebarOpen"
-        class="inline-flex items-center justify-center rounded-lg p-2 text-gray-500 hover:bg-gray-100 lg:hidden"
-    >
-        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"/>
-        </svg>
-    </button>
+    @if(!in_array(auth()->user()->role ?? '', ['siswa', 'siswa_pkl']))
+        {{-- Mobile hamburger --}}
+        <button
+            @click="sidebarOpen = !sidebarOpen"
+            class="inline-flex items-center justify-center rounded-lg p-2 text-gray-500 hover:bg-gray-100 lg:hidden"
+        >
+            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"/>
+            </svg>
+        </button>
+    @endif
 
     {{-- Page title --}}
     <div class="flex-1">

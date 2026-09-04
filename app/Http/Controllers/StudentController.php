@@ -79,6 +79,7 @@ class StudentController extends Controller
         $data = $request->validate([
             'latitude' => ['required', 'numeric', 'between:-90,90'],
             'longitude' => ['required', 'numeric', 'between:-180,180'],
+            'selfie' => ['required', 'image', 'mimes:jpeg,jpg,png,webp', 'max:5120'],
         ]);
 
         $student = auth()->user()->student;
@@ -132,6 +133,8 @@ class StudentController extends Controller
             return response()->json(['message' => 'Anda berada di luar radius sekolah.'], 422);
         }
 
+        $selfiePath = $data['selfie']->store('attendance-selfies', 'public');
+
         DailyAttendance::create([
             'student_id' => $student->id,
             'date' => today(),
@@ -140,6 +143,7 @@ class StudentController extends Controller
             'latitude' => $data['latitude'],
             'longitude' => $data['longitude'],
             'source' => 'web',
+            'selfie_path' => $selfiePath,
         ]);
 
         return response()->json(['message' => 'Check in berhasil!']);

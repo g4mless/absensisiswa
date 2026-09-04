@@ -64,6 +64,12 @@ class PklSupervisorController extends Controller
         return redirect()->route('admin.pkl-supervisors.index')->with('status', $count . ' penugasan berhasil dihapus.');
     }
 
+    public function allDestroy()
+    {
+        $count = PklSupervisor::query()->delete();
+        return redirect()->route('admin.pkl-supervisors.index')->with('status', $count . ' penugasan berhasil dihapus.');
+    }
+
     public function supervisorDashboard()
     {
         $assignedStudents = collect();

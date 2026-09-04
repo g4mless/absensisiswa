@@ -34,7 +34,7 @@
             </div>
             <div class="flex gap-2">
                 @foreach(['' => 'Semua', 'pending' => 'Menunggu', 'approved' => 'Disetujui', 'rejected' => 'Ditolak'] as $value => $label)
-                    <a href="{{ route('teacher.excuses.index', array_merge(request()->query(), ['status' => $value])) }}"
+                    <a href="{{ route('teacher.excuses', array_merge(request()->query(), ['status' => $value])) }}"
                        class="inline-flex items-center rounded-lg px-3 py-1.5 text-xs font-medium transition-colors {{ (request('status', '') === $value) ? 'bg-primary-100 text-primary-700' : 'bg-gray-100 text-gray-600 hover:bg-gray-200' }}">
                         {{ $label }}
                     </a>
@@ -101,7 +101,7 @@
 <x-modal name="upload-excuse" maxWidth="lg">
     <x-slot name="header">Upload Surat Izin</x-slot>
 
-    <form method="POST" action="{{ route('teacher.excuses.store') }}" enctype="multipart/form-data">
+    <form method="POST" action="{{ route('teacher.excuses') }}" enctype="multipart/form-data">
         @csrf
         <div class="space-y-4">
             <x-select label="Siswa" name="student_id" :options="$studentOptions ?? []" placeholder="Pilih siswa" required />
