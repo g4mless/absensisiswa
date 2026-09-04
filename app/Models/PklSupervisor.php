@@ -9,5 +9,15 @@ class PklSupervisor extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['supervisor_name', 'company_name', 'company_address', 'contact_phone'];
+    protected $fillable = ['teacher_id', 'class_id'];
+
+    public function teacher()
+    {
+        return $this->belongsTo(Teacher::class);
+    }
+
+    public function class()
+    {
+        return $this->belongsTo(ClassModel::class);
+    }
 }

@@ -48,14 +48,14 @@
                         <form action="{{ route('admin.teachers.import') }}" method="POST" enctype="multipart/form-data">
                             @csrf
                             <div class="mb-4">
-                                <p class="text-sm text-gray-500 mb-2">Gunakan file jadwal dengan sheet distribusi dan Walas 26-27.</p>
+                                 <p class="text-sm text-gray-500 mb-2">Gunakan untuk data guru, wali kelas, dan jadwal. Import PKL tersedia di menu Pembimbing PKL.</p>
                                 <input type="file" name="file" accept=".xlsx" required @change="readSheets" class="block w-full text-sm text-gray-600 border border-gray-300 rounded-lg p-2">
                             </div>
                             <div x-show="loading" class="text-sm text-gray-500 mb-4">Membaca worksheet...</div>
                             <div x-show="sheets.length > 0" x-cloak class="mb-4 space-y-2">
                                 <p class="text-sm font-medium text-gray-700">Pilih worksheet:</p>
                                 <template x-for="sheet in sheets" :key="sheet">
-                                    <label class="flex items-center gap-2 text-sm text-gray-700">
+                                     <label x-show="sheet !== 'PKL'" class="flex items-center gap-2 text-sm text-gray-700">
                                         <input type="checkbox" name="sheets[]" :value="sheet" x-model="selectedSheets" class="rounded border-gray-300 text-primary-600 focus:ring-primary-500">
                                         <span x-text="sheet"></span>
                                     </label>

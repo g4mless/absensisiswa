@@ -3,35 +3,43 @@
 namespace App\Http\Controllers;
 
 use App\Models\PklSupervisor;
+use App\Models\ClassModel;
+use App\Models\Teacher;
 use Illuminate\Http\Request;
+use Maatwebsite\Excel\Facades\Excel;
+use Throwable;
 
 class PklSupervisorController extends Controller
 {
     public function index()
     {
-        $pklSupervisors = PklSupervisor::orderBy('supervisor_name')->paginate(15);
+        $pklSupervisors = PklSupervisor::with(['teacher.user', 'class.major'])->orderBy('id')->paginate(15);
         return view('admin.pkl-supervisors.index', compact('pklSupervisors'));
+    }
+
+    public function transfer()
+    {
+        return view('admin.data-transfer');
     }
 
     public function create()
     {
-        return view('admin.pkl-supervisors.create');
+        return view('admin.pkl-supervisors.create', $this->formData());
     }
 
     public function edit($id)
     {
         return view('admin.pkl-supervisors.edit', [
             'assignment' => PklSupervisor::findOrFail($id),
+            ...$this->formData(),
         ]);
     }
 
     public function store(Request $request)
     {
         $data = $request->validate([
-            'supervisor_name' => ['required', 'string', 'max:255'],
-            'company_name' => ['required', 'string', 'max:255'],
-            'company_address' => ['required', 'string'],
-            'contact_phone' => ['nullable', 'string', 'max:30'],
+            'teacher_id' => ['required', 'exists:teachers,id'],
+            'class_id' => ['required', 'exists:classes,id'],
         ]);
         PklSupervisor::create($data);
         return redirect()->route('admin.pkl-supervisors.index');
@@ -41,10 +49,8 @@ class PklSupervisorController extends Controller
     {
         $assignment = PklSupervisor::findOrFail($id);
         $data = $request->validate([
-            'supervisor_name' => ['required', 'string', 'max:255'],
-            'company_name' => ['required', 'string', 'max:255'],
-            'company_address' => ['required', 'string'],
-            'contact_phone' => ['nullable', 'string', 'max:30'],
+            'teacher_id' => ['required', 'exists:teachers,id'],
+            'class_id' => ['required', 'exists:classes,id'],
         ]);
         $assignment->update($data);
 
@@ -68,6 +74,34 @@ class PklSupervisorController extends Controller
     {
         $count = PklSupervisor::query()->delete();
         return redirect()->route('admin.pkl-supervisors.index')->with('status', $count . ' penugasan berhasil dihapus.');
+    }
+
+    public function import(Request $request)
+    {
+        $request->validate(['file' => ['required', 'file', 'mimes:xlsx']]);
+
+        try {
+            $result = (new \App\Imports\TeacherImport)->import($request->file('file'), ['PKL']);
+        } catch (Throwable $exception) {
+            return redirect()->route('admin.pkl-supervisors.index')
+                ->with('error', $exception->getMessage());
+        }
+
+        return redirect()->route('admin.pkl-supervisors.index')
+            ->with('success', "{$result['teachers']} guru pembimbing dan penugasannya berhasil diimpor dari worksheet PKL.");
+    }
+
+    public function export()
+    {
+        return Excel::download(new \App\Exports\PklSupervisorExport, 'pembimbing_pkl.xlsx');
+    }
+
+    private function formData(): array
+    {
+        return [
+            'teachers' => Teacher::with('user')->orderBy('nip')->get(),
+            'classes' => ClassModel::with('major')->orderBy('grade')->orderBy('major_id')->orderBy('section')->get(),
+        ];
     }
 
     public function supervisorDashboard()

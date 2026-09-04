@@ -11,16 +11,21 @@
             <h1 class="text-2xl font-bold text-gray-900">Pembimbing PKL</h1>
             <p class="text-gray-500">Kelola penugasan pembimbing PKL/magang</p>
         </div>
-        <a href="{{ route('admin.pkl-supervisors.create') }}">
+        <div class="flex flex-wrap gap-2 items-center">
+            <a href="{{ route('admin.pkl-supervisors.create') }}">
                 <x-button variant="primary">
                     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
                     Tambah Penugasan
                 </x-button>
-        </a>
+            </a>
+        </div>
     </div>
 
     @if(session('success'))
         <x-alert variant="success" title="Berhasil" dismissible>{{ session('success') }}</x-alert>
+    @endif
+    @if(session('error'))
+        <x-alert variant="danger" title="Import gagal" dismissible>{{ session('error') }}</x-alert>
     @endif
 
     <x-card x-data="{
@@ -62,10 +67,8 @@
                         <th class="w-12">
                             <input type="checkbox" x-model="allSelected" class="rounded border-gray-300 text-primary-600 focus:ring-primary-500">
                         </th>
-                        <th>Pembimbing PKL</th>
-                        <th>Perusahaan/Tempat</th>
-                        <th>Alamat Perusahaan</th>
-                        <th>Nomor Kontak</th>
+                            <th>Guru Pembimbing</th>
+                            <th>Kelas</th>
                         <th>Aksi</th>
                     </tr>
                 </thead>
@@ -75,10 +78,8 @@
                             <td>
                                 <input type="checkbox" value="{{ $assignment->id }}" x-model="selected" class="rounded border-gray-300 text-primary-600 focus:ring-primary-500">
                             </td>
-                            <td class="font-medium">{{ $assignment->supervisor_name }}</td>
-                            <td>{{ $assignment->company_name ?? '-' }}</td>
-                            <td class="max-w-xs whitespace-normal">{{ $assignment->company_address ?? '-' }}</td>
-                            <td>{{ $assignment->contact_phone ?? '-' }}</td>
+                            <td class="font-medium">{{ $assignment->teacher->user->name ?? '-' }}</td>
+                            <td>{{ $assignment->class ? $assignment->class->grade.' '.$assignment->class->major->code.' '.$assignment->class->section : '-' }}</td>
                             <td>
                                 <div class="flex items-center gap-2">
                                     <a href="{{ route('admin.pkl-supervisors.edit', $assignment) }}">
@@ -94,7 +95,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="6">
+                            <td colspan="4">
                                 <x-empty-state title="Tidak ada penugasan ditemukan" description="Mulai dengan menugaskan pembimbing PKL." />
                             </td>
                         </tr>

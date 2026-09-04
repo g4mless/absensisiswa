@@ -25,6 +25,11 @@
                 <span>Dashboard</span>
             </a>
 
+            <a href="{{ route('admin.import-export') }}" class="{{ request()->routeIs('admin.import-export') ? 'md-sidebar-link-active' : 'md-sidebar-link' }}">
+                <svg class="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3 7.5h13.5M3 12h18M3 16.5h13.5M18 5.25v13.5m0 0 3.75-3.75M18 18.75 14.25 15"/></svg>
+                <span>Import/Ekspor</span>
+            </a>
+
             <div class="pt-3 pb-1 px-3">
                 <p class="text-[10px] font-semibold uppercase tracking-wider text-gray-400">Manajemen Data</p>
             </div>

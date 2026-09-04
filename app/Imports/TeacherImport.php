@@ -5,6 +5,7 @@ namespace App\Imports;
 use App\Models\ClassModel;
 use App\Models\HomeroomTeacher;
 use App\Models\Major;
+use App\Models\PklSupervisor;
 use App\Models\ProgramHead;
 use App\Models\Schedule;
 use App\Models\Subject;
@@ -21,25 +22,46 @@ class TeacherImport
 {
     public function import(UploadedFile $file, array $selectedSheets): array
     {
-        if (! in_array('distribusi', $selectedSheets, true)) {
-            throw new RuntimeException('Pilih worksheet distribusi.');
+        if (! array_intersect(['distribusi', 'PKL'], $selectedSheets)) {
+            throw new RuntimeException('Pilih worksheet distribusi atau PKL.');
         }
 
         $reader = IOFactory::createReaderForFile($file->getRealPath());
         $reader->setReadDataOnly(true);
-        $reader->setLoadSheetsOnly($selectedSheets);
+        $needsDistribution = in_array('distribusi', $selectedSheets, true)
+            || in_array('Walas 26-27', $selectedSheets, true)
+            || in_array('10', $selectedSheets, true)
+            || in_array('11', $selectedSheets, true);
+        $loadSheets = $needsDistribution
+            ? array_values(array_unique([...$selectedSheets, 'distribusi']))
+            : $selectedSheets;
+        $reader->setLoadSheetsOnly($loadSheets);
         $workbook = $reader->load($file->getRealPath());
-        $distribution = $workbook->getSheetByName('distribusi');
-
-        if (! $distribution) {
-            throw new RuntimeException('Worksheet distribusi tidak ditemukan.');
+        $distributionData = ['teachers' => [], 'nips' => [], 'codes' => []];
+        if ($needsDistribution) {
+            $distribution = $workbook->getSheetByName('distribusi');
+            if (! $distribution) {
+                throw new RuntimeException('Worksheet distribusi tidak ditemukan.');
+            }
+            $distributionData = $this->readDistribution($distribution);
         }
-
-        $distributionData = $this->readDistribution($distribution);
         $teachers = [];
 
         DB::transaction(function () use ($workbook, $selectedSheets, $distributionData, &$teachers) {
-            $teachers = $this->saveTeachers($distributionData['teachers']);
+            if (in_array('distribusi', $selectedSheets, true)) {
+                $this->destroyTeachers();
+            }
+
+            $teacherData = $distributionData['teachers'];
+            if (in_array('PKL', $selectedSheets, true)) {
+                $pklData = $this->readPkl($workbook->getSheetByName('PKL'));
+                $teacherData = array_merge($teacherData, $pklData['teachers']);
+                $teachers = $this->saveTeachers($teacherData);
+                PklSupervisor::query()->delete();
+                $this->savePklSupervisors($pklData, $teachers);
+            } else {
+                $teachers = $this->saveTeachers($teacherData);
+            }
 
             if (in_array('Walas 26-27', $selectedSheets, true)) {
                 $this->saveWalas($workbook->getSheetByName('Walas 26-27'), $distributionData['nips']);
@@ -55,6 +77,71 @@ class TeacherImport
         return ['teachers' => count($teachers)];
     }
 
+    private function destroyTeachers(): void
+    {
+        foreach (Teacher::with('user')->get() as $teacher) {
+            if ($teacher->user) {
+                $teacher->user->delete();
+            } else {
+                $teacher->delete();
+            }
+        }
+    }
+
+    private function readPkl($sheet): array
+    {
+        if (! $sheet) {
+            throw new RuntimeException('Worksheet PKL tidak ditemukan.');
+        }
+
+        $teachers = [];
+        $assignments = [];
+        $classColumns = range(5, 15); // E:O, kelas 12 pada worksheet PKL.
+
+        for ($row = 8; $row <= $sheet->getHighestRow(); $row += 2) {
+            $name = trim((string) $sheet->getCell("B$row")->getValue());
+            $subject = strtoupper(trim((string) $sheet->getCell("C$row")->getValue()));
+            $nipValue = trim((string) $sheet->getCell('B'.($row + 1))->getValue());
+            if ($name === '' || $nipValue === '' || $subject !== 'MATA PELAJARAN PKL') {
+                continue;
+            }
+
+            $nip = preg_replace('/^NIP[A-Z]*\.?/i', '', $nipValue);
+            $key = $this->normalizeName($name);
+            $teachers[$key] = ['name' => $name, 'nip' => $nip];
+
+            foreach ($classColumns as $column) {
+                $hours = $sheet->getCellByColumnAndRow($column, $row)->getValue();
+                if (! is_numeric($hours) || (float) $hours <= 0) {
+                    continue;
+                }
+
+                $header = trim((string) $sheet->getCellByColumnAndRow($column, 6)->getValue());
+                if ($header !== '') {
+                    $assignments[] = ['nip' => $nip, 'class' => $header];
+                }
+            }
+        }
+
+        return compact('teachers', 'assignments');
+    }
+
+    private function savePklSupervisors(array $pklData, array $teachers): void
+    {
+        foreach ($pklData['assignments'] as $assignment) {
+            $teacher = $teachers[$assignment['nip']] ?? null;
+            if (! $teacher) {
+                throw new RuntimeException("Guru pembimbing PKL tidak ditemukan: {$assignment['nip']}");
+            }
+
+            $class = $this->classFromHeader('12', $assignment['class']);
+            PklSupervisor::updateOrCreate([
+                'teacher_id' => $teacher->id,
+                'class_id' => $class->id,
+            ]);
+        }
+    }
+
     private function readDistribution($sheet): array
     {
         $teachers = [];
@@ -67,7 +154,7 @@ class TeacherImport
             $nextValue = trim((string) $sheet->getCell('B'.($row + 1))->getValue());
 
             if (is_numeric($number) && $name !== '' && str_starts_with($nextValue, 'NIP')) {
-                $nip = preg_replace('/^NIP(?:PPK)?\.?/i', '', $nextValue);
+                $nip = preg_replace('/^NIP[A-Z]*\.?/i', '', $nextValue);
                 $key = $this->normalizeName($name);
                 $teachers[$key] = ['name' => $name, 'nip' => $nip];
                 $nips[$key] = $nip;
