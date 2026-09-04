@@ -4,14 +4,13 @@ namespace App\Exports;
 
 use App\Models\Teacher;
 use Illuminate\Support\Collection;
-use Maatwebsite\Excel\Concerns\Export;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
 use Maatwebsite\Excel\Concerns\WithStyles;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
-class TeacherExport implements Export, FromCollection, WithHeadings, WithMapping, WithStyles
+class TeacherExport implements FromCollection, WithHeadings, WithMapping, WithStyles
 {
     public function collection(): Collection
     {

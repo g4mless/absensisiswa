@@ -62,9 +62,9 @@
                         <th class="w-12">
                             <input type="checkbox" x-model="allSelected" class="rounded border-gray-300 text-primary-600 focus:ring-primary-500">
                         </th>
-                        <th>Guru</th>
-                        <th>Siswa</th>
+                        <th>Pembimbing PKL</th>
                         <th>Perusahaan/Tempat</th>
+                        <th>Nomor Kontak</th>
                         <th>Aksi</th>
                     </tr>
                 </thead>
@@ -74,9 +74,9 @@
                             <td>
                                 <input type="checkbox" value="{{ $assignment->id }}" x-model="selected" class="rounded border-gray-300 text-primary-600 focus:ring-primary-500">
                             </td>
-                            <td class="font-medium">{{ $assignment->teacher->name ?? '-' }}</td>
-                            <td>{{ $assignment->student->name ?? '-' }}</td>
+                            <td class="font-medium">{{ $assignment->supervisor_name }}</td>
                             <td>{{ $assignment->company_name ?? '-' }}</td>
+                            <td>{{ $assignment->contact_phone ?? '-' }}</td>
                             <td>
                                 <div class="flex items-center gap-2">
                                     <a href="{{ route('admin.pkl-supervisors.edit', $assignment) }}">

@@ -31,11 +31,6 @@ class Student extends Model
         return $this->hasMany(Attendance::class);
     }
 
-    public function pklSupervisor()
-    {
-        return $this->hasOne(PklSupervisor::class);
-    }
-
     public function getNameAttribute()
     {
         return $this->user->name ?? '-';
