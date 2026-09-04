@@ -16,10 +16,24 @@
             @csrf
             @method('PUT')
             <div class="space-y-4">
-                <x-input label="Nama Pembimbing PKL" name="supervisor_name" :error="$errors->first('supervisor_name')" value="{{ old('supervisor_name', $assignment->supervisor_name) }}" placeholder="contoh: Budi Santoso" />
-                <x-input label="Nama Perusahaan/Tempat" name="company_name" :error="$errors->first('company_name')" value="{{ old('company_name', $assignment->company_name) }}" placeholder="contoh: PT Teknologi Nusantara" />
-                <x-input label="Alamat Perusahaan" name="company_address" :error="$errors->first('company_address')" value="{{ old('company_address', $assignment->company_address) }}" />
-                <x-input label="Nomor Kontak" name="contact_phone" :error="$errors->first('contact_phone')" value="{{ old('contact_phone', $assignment->contact_phone) }}" placeholder="contoh: 08123456789" />
+                <div>
+                    <label for="teacher_id" class="block text-sm font-medium text-gray-700 mb-1">Guru Pembimbing</label>
+                    <select id="teacher_id" name="teacher_id" required class="w-full rounded-lg border-gray-300 focus:border-primary-500 focus:ring-primary-500">
+                        @foreach($teachers as $teacher)
+                            <option value="{{ $teacher->id }}" @selected(old('teacher_id', $assignment->teacher_id) == $teacher->id)>{{ $teacher->user->name }} ({{ $teacher->nip }})</option>
+                        @endforeach
+                    </select>
+                    @error('teacher_id')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
+                </div>
+                <div>
+                    <label for="class_id" class="block text-sm font-medium text-gray-700 mb-1">Kelas</label>
+                    <select id="class_id" name="class_id" required class="w-full rounded-lg border-gray-300 focus:border-primary-500 focus:ring-primary-500">
+                        @foreach($classes as $class)
+                            <option value="{{ $class->id }}" @selected(old('class_id', $assignment->class_id) == $class->id)>{{ $class->grade }} {{ $class->major->code }} {{ $class->section }}</option>
+                        @endforeach
+                    </select>
+                    @error('class_id')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
+                </div>
             </div>
             <div class="flex items-center gap-3 mt-6">
                 <x-button variant="primary" type="submit">Simpan Perubahan</x-button>

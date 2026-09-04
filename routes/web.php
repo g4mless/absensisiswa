@@ -29,6 +29,7 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () {
     Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
+    Route::get('/import-export', [PklSupervisorController::class, 'transfer'])->name('import-export');
 
     Route::resource('users', UserController::class);
     Route::post('users/bulk-destroy', [UserController::class, 'bulkDestroy'])->name('users.bulk-destroy');
@@ -56,6 +57,8 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
     Route::post('teacher-subjects/all-destroy', [TeacherSubjectController::class, 'allDestroy'])->name('teacher-subjects.all-destroy');
     Route::resource('program-heads', ProgramHeadController::class)->only(['index', 'create', 'store', 'destroy']);
     Route::resource('pkl-supervisors', PklSupervisorController::class)->only(['index', 'create', 'store', 'edit', 'update', 'destroy']);
+    Route::post('pkl-supervisors/import', [PklSupervisorController::class, 'import'])->name('pkl-supervisors.import');
+    Route::get('pkl-supervisors/export', [PklSupervisorController::class, 'export'])->name('pkl-supervisors.export');
     Route::post('pkl-supervisors/bulk-destroy', [PklSupervisorController::class, 'bulkDestroy'])->name('pkl-supervisors.bulk-destroy');
     Route::post('pkl-supervisors/all-destroy', [PklSupervisorController::class, 'allDestroy'])->name('pkl-supervisors.all-destroy');
     Route::resource('schedules', ScheduleController::class);
