@@ -14,6 +14,20 @@ class ClassModel extends Model
 
     protected $appends = ['name'];
 
+    public function setGradeAttribute($value): void
+    {
+        $this->attributes['grade'] = self::normalizeGrade($value);
+    }
+
+    public static function normalizeGrade($value): string
+    {
+        return [
+            '10' => 'X',
+            '11' => 'XI',
+            '12' => 'XII',
+        ][strtoupper(trim((string) $value))] ?? strtoupper(trim((string) $value));
+    }
+
     public function major()
     {
         return $this->belongsTo(Major::class);

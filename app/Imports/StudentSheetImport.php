@@ -52,8 +52,8 @@ class StudentSheetImport implements OnEachRow, WithEvents
 
     protected function getOrCreateClass(string $rombel): int
     {
-        preg_match('/^(\d+)\s+([A-Za-z0-9]+)(?:\s+(.+))?$/', trim($rombel), $parts);
-        $grade = $parts[1] ?? 'X';
+        preg_match('/^(10|11|12|XII|XI|X)\s+([A-Za-z0-9]+)(?:\s+(.+))?$/i', trim($rombel), $parts);
+        $grade = ClassModel::normalizeGrade($parts[1] ?? 'X');
         $code = strtoupper($parts[2] ?? $rombel);
         $section = trim($parts[3] ?? '1');
 
