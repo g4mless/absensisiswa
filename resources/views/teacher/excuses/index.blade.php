@@ -5,13 +5,13 @@
 @endsection
 
 @section('content')
-<div class="space-y-6">
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+<div class="space-y-4 sm:space-y-6">
+    <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
         <div>
-            <h1 class="text-2xl font-bold text-gray-900">Surat Izin</h1>
-            <p class="text-gray-500">Kelola surat izin dari siswa</p>
+            <h1 class="text-xl font-bold text-gray-900 sm:text-2xl">Surat Izin</h1>
+            <p class="mt-0.5 text-sm text-gray-500">Kelola surat izin dari siswa</p>
         </div>
-        <x-button variant="primary" x-on:click="$dispatch('open-modal', { name: 'upload-excuse' })">
+        <x-button variant="primary" class="min-h-[44px] w-full sm:w-auto" x-on:click="$dispatch('open-modal', { name: 'upload-excuse' })">
             <svg class="h-4 w-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5"/></svg>
             Upload Surat
         </x-button>
@@ -28,20 +28,41 @@
     @endif
 
     <x-card>
-        <div class="flex flex-col sm:flex-row sm:items-center gap-4 mb-4">
+        <div class="flex flex-col gap-3 sm:flex-row sm:items-center mb-4">
             <div class="flex-1">
                 <x-search-input name="search" placeholder="Cari siswa atau surat izin..." value="{{ request('search') }}" />
             </div>
-            <div class="flex gap-2">
+            <div class="flex gap-2 overflow-x-auto no-scrollbar -mx-3 px-3 sm:mx-0 sm:px-0 sm:flex-wrap">
                 @foreach(['' => 'Semua', 'pending' => 'Menunggu', 'approved' => 'Disetujui', 'rejected' => 'Ditolak'] as $value => $label)
                     <a href="{{ route('teacher.excuses', array_merge(request()->query(), ['status' => $value])) }}"
-                       class="inline-flex items-center rounded-lg px-3 py-1.5 text-xs font-medium transition-colors {{ (request('status', '') === $value) ? 'bg-primary-100 text-primary-700' : 'bg-gray-100 text-gray-600 hover:bg-gray-200' }}">
+                       class="inline-flex shrink-0 items-center rounded-lg px-3 py-2 text-xs font-medium transition-colors min-h-[36px] {{ (request('status', '') === $value) ? 'bg-primary-100 text-primary-700' : 'bg-gray-100 text-gray-600 hover:bg-gray-200' }}">
                         {{ $label }}
                     </a>
                 @endforeach
             </div>
         </div>
 
+        {{-- Mobile cards --}}
+        <div class="space-y-2 md:hidden">
+            @forelse($excuses ?? [] as $excuse)
+                <a href="{{ route('teacher.excuses.show', $excuse->id) }}" class="block rounded-xl border border-gray-100 bg-white p-3 shadow-sm active:bg-gray-50">
+                    <div class="flex items-start justify-between gap-2">
+                        <div class="min-w-0 flex-1">
+                            <p class="truncate text-sm font-semibold text-gray-900">{{ $excuse->student->name ?? '-' }}</p>
+                            <p class="mt-0.5 truncate text-xs text-gray-500">{{ $excuse->student->class->name ?? $excuse->student->classroom->name ?? '-' }} &middot; {{ $excuse->date ? \Carbon\Carbon::parse($excuse->date)->format('d M Y') : '-' }}</p>
+                            <p class="mt-0.5 text-xs text-gray-500">{{ $excuse->type ?? '-' }}</p>
+                        </div>
+                        <x-badge variant="{{ $excuse->status === 'pending' ? 'warning' : ($excuse->status === 'approved' ? 'success' : 'danger') }}" class="shrink-0">
+                            {{ ucfirst($excuse->status) }}
+                        </x-badge>
+                    </div>
+                </a>
+            @empty
+                <x-empty-state title="Tidak ada surat izin" description="Belum ada surat izin dari siswa." />
+            @endforelse
+        </div>
+
+        <div class="hidden md:block">
         <x-table>
             <thead>
                 <tr>
@@ -84,6 +105,7 @@
                 @endforelse
             </tbody>
         </x-table>
+        </div>
 
         @if(isset($excuses) && $excuses instanceof \Illuminate\Pagination\LengthAwarePaginator)
             <div class="mt-4">

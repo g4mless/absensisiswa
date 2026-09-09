@@ -5,10 +5,10 @@
 @endsection
 
 @section('content')
-<div class="max-w-2xl mx-auto space-y-6">
+<div class="mx-auto max-w-2xl space-y-4 sm:space-y-6">
     <div>
-        <h1 class="text-2xl font-bold text-gray-900">Profile</h1>
-        <p class="text-gray-500">Kelola informasi profil Anda</p>
+        <h1 class="text-xl font-bold text-gray-900 sm:text-2xl">Profile</h1>
+        <p class="mt-0.5 text-sm text-gray-500">Kelola informasi profil Anda</p>
     </div>
 
     <x-card>
@@ -21,7 +21,7 @@
                 <x-input label="Role" name="role" value="{{ auth()->user()->role }}" disabled />
             </div>
             <div class="mt-6">
-                <x-button variant="primary" type="submit">Simpan Perubahan</x-button>
+                <x-button variant="primary" type="submit" class="min-h-[44px] w-full sm:w-auto">Simpan Perubahan</x-button>
             </div>
         </form>
     </x-card>
@@ -37,7 +37,7 @@
                 <x-input label="Konfirmasi Password Baru" name="password_confirmation" type="password" required />
             </div>
             <div class="mt-6">
-                <x-button variant="primary" type="submit">Ubah Password</x-button>
+                <x-button variant="primary" type="submit" class="min-h-[44px] w-full sm:w-auto">Ubah Password</x-button>
             </div>
         </form>
     </x-card>

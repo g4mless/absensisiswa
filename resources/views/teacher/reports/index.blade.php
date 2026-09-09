@@ -5,10 +5,10 @@
 @endsection
 
 @section('content')
-<div class="space-y-6">
+<div class="space-y-4 sm:space-y-6">
     <div>
-        <h1 class="text-2xl font-bold text-gray-900">Laporan Absensi</h1>
-        <p class="text-gray-500">Buat dan unduh laporan kehadiran siswa</p>
+        <h1 class="text-xl font-bold text-gray-900 sm:text-2xl">Laporan Absensi</h1>
+        <p class="mt-0.5 text-sm text-gray-500">Buat dan unduh laporan kehadiran siswa</p>
     </div>
 
     <x-card>
@@ -23,7 +23,7 @@
             </div>
 
             <div class="flex gap-2">
-                <x-button type="submit" variant="primary">
+                <x-button type="submit" variant="primary" class="min-h-[44px] w-full sm:w-auto">
                     <svg class="h-4 w-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"/></svg>
                     Tampilkan
                 </x-button>
@@ -32,7 +32,7 @@
     </x-card>
 
     @if(isset($reportData))
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
             <x-stat-card title="Total Siswa" value="{{ $reportStats['total_students'] ?? 0 }}" icon="users" />
             <x-stat-card title="Hadir" value="{{ $reportStats['present'] ?? 0 }}" icon="check-circle" description="{{ $reportStats['present_rate'] ?? '0%' }}" />
             <x-stat-card title="Izin & Sakit" value="{{ ($reportStats['excused'] ?? 0) + ($reportStats['sick'] ?? 0) }}" icon="document" />
@@ -43,7 +43,32 @@
             <x-slot name="header">Hasil Laporan</x-slot>
             <x-slot name="subtitle">{{ $reportType ?? 'Harian' }} &middot; {{ $startDate ?? date('Y-m-d') }} s/d {{ $endDate ?? date('Y-m-d') }}</x-slot>
 
-            <div class="overflow-x-auto">
+            {{-- Mobile cards --}}
+            <div class="space-y-2 md:hidden">
+                @forelse($reportData as $index => $row)
+                    @php $rate = ($row['total_students'] ?? 0) > 0 ? round((($row['present'] ?? 0) / $row['total_students']) * 100) : 0; @endphp
+                    <div class="rounded-xl border border-gray-100 p-3">
+                        <div class="flex items-center justify-between gap-2">
+                            <p class="truncate text-sm font-semibold text-gray-900">{{ $row['class_name'] ?? '-' }}</p>
+                            <span class="shrink-0 text-xs font-bold {{ $rate >= 80 ? 'text-green-600' : ($rate >= 60 ? 'text-yellow-600' : 'text-red-600') }}">{{ $rate }}%</span>
+                        </div>
+                        <div class="mt-2 h-1.5 overflow-hidden rounded-full bg-gray-100">
+                            <div class="h-full rounded-full {{ $rate >= 80 ? 'bg-green-500' : ($rate >= 60 ? 'bg-yellow-500' : 'bg-red-500') }}" style="width: {{ $rate }}%"></div>
+                        </div>
+                        <div class="mt-2 grid grid-cols-5 gap-1 text-center text-[11px]">
+                            <span class="rounded bg-gray-50 py-1"><b class="block text-xs">{{ $row['total_students'] ?? 0 }}</b>Total</span>
+                            <span class="rounded bg-green-50 py-1 text-green-700"><b class="block text-xs">{{ $row['present'] ?? 0 }}</b>Hadir</span>
+                            <span class="rounded bg-yellow-50 py-1 text-yellow-700"><b class="block text-xs">{{ $row['excused'] ?? 0 }}</b>Izin</span>
+                            <span class="rounded bg-blue-50 py-1 text-blue-700"><b class="block text-xs">{{ $row['sick'] ?? 0 }}</b>Sakit</span>
+                            <span class="rounded bg-red-50 py-1 text-red-700"><b class="block text-xs">{{ $row['absent'] ?? 0 }}</b>Alfa</span>
+                        </div>
+                    </div>
+                @empty
+                    <x-empty-state title="Tidak ada data" description="Tidak ditemukan data untuk filter yang dipilih." />
+                @endforelse
+            </div>
+
+            <div class="hidden overflow-x-auto md:block">
                 <x-table>
                     <thead>
                         <tr>

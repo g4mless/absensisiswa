@@ -5,16 +5,16 @@
 @endsection
 
 @section('content')
-<div class="space-y-6">
-    <div class="flex items-center gap-2 mb-1">
-        <a href="{{ route('teacher.classes') }}" class="text-sm text-gray-500 hover:text-primary-600 transition-colors">Kelas</a>
-        <svg class="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5"/></svg>
-        <a href="{{ route('teacher.classes.show', $student->class->id ?? $student->classroom->id ?? 0) }}" class="text-sm text-gray-500 hover:text-primary-600 transition-colors">{{ $student->class->name ?? $student->classroom->name ?? '-' }}</a>
-        <svg class="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5"/></svg>
-        <span class="text-sm font-medium text-gray-900">{{ $student->name ?? '-' }}</span>
+<div class="space-y-4 sm:space-y-6">
+    <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar whitespace-nowrap text-sm">
+        <a href="{{ route('teacher.classes') }}" class="inline-flex min-h-[44px] items-center shrink-0 text-gray-500 hover:text-primary-600 transition-colors">Kelas</a>
+        <svg class="h-4 w-4 shrink-0 text-gray-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5"/></svg>
+        <a href="{{ route('teacher.classes.show', $student->class->id ?? $student->classroom->id ?? 0) }}" class="shrink-0 text-gray-500 hover:text-primary-600 transition-colors">{{ $student->class->name ?? $student->classroom->name ?? '-' }}</a>
+        <svg class="h-4 w-4 shrink-0 text-gray-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5"/></svg>
+        <span class="truncate font-medium text-gray-900">{{ $student->name ?? '-' }}</span>
     </div>
 
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <div class="grid grid-cols-1 gap-4 sm:gap-6 lg:grid-cols-3">
         <div class="lg:col-span-1">
             <x-card>
                 <div class="text-center">
@@ -81,11 +81,29 @@
             </x-card>
         </div>
 
-        <div class="lg:col-span-2 space-y-6">
+        <div class="lg:col-span-2 space-y-4 sm:space-y-6">
             <x-card>
                 <x-slot name="header">Riwayat Kehadiran</x-slot>
                 <x-slot name="subtitle">10 catatan terakhir</x-slot>
 
+                {{-- Mobile cards --}}
+                <div class="space-y-2 md:hidden">
+                    @forelse($student->attendance_history ?? [] as $record)
+                        <div class="flex items-center gap-3 rounded-xl border border-gray-100 p-3">
+                            <div class="min-w-0 flex-1">
+                                <p class="truncate text-sm font-semibold text-gray-900">{{ $record->session->subject->name ?? '-' }}</p>
+                                <p class="mt-0.5 truncate text-xs text-gray-500">{{ $record->date ? \Carbon\Carbon::parse($record->date)->format('d M Y') : '-' }} &middot; {{ $record->session->class->name ?? $record->session->classroom->name ?? '-' }}</p>
+                            </div>
+                            <x-badge variant="{{ match($record->status) { 'HADIR' => 'success', 'IZIN' => 'warning', 'SAKIT' => 'info', 'ALFA' => 'danger', default => 'neutral' } }}" class="shrink-0">
+                                {{ $record->status }}
+                            </x-badge>
+                        </div>
+                    @empty
+                        <x-empty-state title="Belum ada riwayat" description="Belum ada catatan kehadiran." />
+                    @endforelse
+                </div>
+
+                <div class="hidden md:block">
                 <x-table>
                     <thead>
                         <tr>
@@ -118,6 +136,7 @@
                         @endforelse
                     </tbody>
                 </x-table>
+                </div>
             </x-card>
 
             <x-card>

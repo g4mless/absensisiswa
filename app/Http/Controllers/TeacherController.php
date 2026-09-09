@@ -204,13 +204,6 @@ class TeacherController extends Controller
         $selectedDate = $request->input('date', today()->format('Y-m-d'));
         $dayName = Carbon::parse($selectedDate)->format('l');
 
-        // Opsi tanggal: 7 hari ke belakang + 7 hari ke depan.
-        $dateOptions = collect(range(-7, 7))->mapWithKeys(function ($offset) {
-            $d = today()->addDays($offset);
-
-            return [$d->format('Y-m-d') => $d->translatedFormat('d M Y (l)')];
-        })->all();
-
         $sessions = $teacher
             ? Schedule::with(['class', 'subject'])
                 ->where('teacher_id', $teacher->id)
@@ -240,7 +233,7 @@ class TeacherController extends Controller
         }
 
         return view('teacher.attendance.index', compact(
-            'sessions', 'dateOptions', 'selectedDate'
+            'sessions', 'selectedDate'
         ));
     }
 

@@ -5,20 +5,20 @@
 @endsection
 
 @section('content')
-<div class="space-y-6">
+<div class="space-y-4 sm:space-y-6">
     <div>
-        <h1 class="text-2xl font-bold text-gray-900">Dashboard</h1>
-        <p class="text-gray-500">Selamat datang, {{ auth()->user()->name }}</p>
+        <h1 class="text-xl font-bold text-gray-900 sm:text-2xl">Dashboard</h1>
+        <p class="mt-0.5 truncate text-sm text-gray-500">Selamat datang, {{ auth()->user()->name }}</p>
     </div>
 
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+    <div class="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
         <x-stat-card title="Kelas Saya" value="{{ $totalClasses ?? 0 }}" icon="users" />
         <x-stat-card title="Sesi Hari Ini" value="{{ $todaySessions ?? 0 }}" icon="calendar" />
         <x-stat-card title="Siswa Hadir" value="{{ $studentsPresentToday ?? 0 }}" icon="check-circle" trend="up" trendValue="{{ $attendanceRate ?? '0%' }}" />
         <x-stat-card title="Surat Izin Pending" value="{{ $pendingExcuses ?? 0 }}" icon="document" />
     </div>
 
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <div class="grid grid-cols-1 gap-4 sm:gap-6 lg:grid-cols-3">
         <div class="lg:col-span-2">
             <x-card>
                 <x-slot name="header">Jadwal Hari Ini</x-slot>
@@ -26,15 +26,17 @@
 
                 <div class="space-y-3">
                     @forelse($todaySchedule ?? [] as $session)
-                        <div class="flex items-center gap-4 rounded-xl border border-gray-100 p-4 hover:bg-gray-50 transition-colors">
-                            <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-primary-50 text-sm font-bold text-primary-700">
-                                {{ \Carbon\Carbon::parse($session->start_time)->format('H:i') }}
+                        <div class="flex flex-col gap-3 rounded-xl border border-gray-100 p-3 sm:flex-row sm:items-center sm:gap-4 sm:p-4 hover:bg-gray-50 transition-colors">
+                            <div class="flex items-center gap-3 sm:flex-1 sm:min-w-0">
+                                <div class="flex h-11 w-14 shrink-0 items-center justify-center rounded-lg bg-primary-50 text-xs font-bold text-primary-700 sm:h-12 sm:w-12 sm:text-sm">
+                                    {{ \Carbon\Carbon::parse($session->start_time)->format('H:i') }}
+                                </div>
+                                <div class="min-w-0 flex-1">
+                                    <p class="truncate text-sm font-semibold text-gray-900">{{ $session->subject->name ?? '-' }}</p>
+                                    <p class="truncate text-xs text-gray-500">{{ $session->class->name ?? $session->classroom->name ?? '-' }} &middot; {{ $session->room ?? '-' }}</p>
+                                </div>
                             </div>
-                            <div class="flex-1 min-w-0">
-                                <p class="text-sm font-semibold text-gray-900">{{ $session->subject->name ?? '-' }}</p>
-                                <p class="text-xs text-gray-500">{{ $session->class->name ?? $session->classroom->name ?? '-' }} &middot; {{ $session->room ?? '-' }}</p>
-                            </div>
-                            <x-badge variant="{{ $session->is_current ? 'success' : 'neutral' }}">
+                            <x-badge variant="{{ $session->is_current ? 'success' : 'neutral' }}" class="self-start sm:self-center">
                                 {{ $session->is_current ? 'Berlangsung' : \Carbon\Carbon::parse($session->start_time)->format('H:i') . ' - ' . \Carbon\Carbon::parse($session->end_time)->format('H:i') }}
                             </x-badge>
                         </div>
@@ -48,7 +50,7 @@
         <div>
             <x-card>
                 <x-slot name="header">Aksi Cepat</x-slot>
-                <div class="space-y-3">
+                <div class="grid grid-cols-2 gap-2 sm:flex sm:flex-col sm:gap-3">
                     <a href="{{ route('teacher.attendance') }}" class="block">
                         <x-button variant="primary" class="w-full">Input Absensi</x-button>
                     </a>

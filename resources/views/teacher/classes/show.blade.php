@@ -5,20 +5,20 @@
 @endsection
 
 @section('content')
-<div class="space-y-6">
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-            <div class="flex items-center gap-2 mb-1">
-                <a href="{{ route('teacher.classes') }}" class="text-sm text-gray-500 hover:text-primary-600 transition-colors">Kelas</a>
-                <svg class="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5"/></svg>
-                <span class="text-sm font-medium text-gray-900">{{ $class->name ?? '-' }}</span>
+<div class="space-y-4 sm:space-y-6">
+    <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+        <div class="min-w-0">
+            <div class="mb-1 flex items-center gap-2">
+                <a href="{{ route('teacher.classes') }}" class="inline-flex min-h-[44px] items-center text-sm text-gray-500 hover:text-primary-600 transition-colors">Kelas</a>
+                <svg class="h-4 w-4 shrink-0 text-gray-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5"/></svg>
+                <span class="truncate text-sm font-medium text-gray-900">{{ $class->name ?? '-' }}</span>
             </div>
-            <h1 class="text-2xl font-bold text-gray-900">{{ $class->name ?? '-' }}</h1>
-            <p class="text-gray-500">{{ $class->major?->code ?? '' }} &middot; {{ $class->students_count ?? 0 }} siswa</p>
+            <h1 class="truncate text-xl font-bold text-gray-900 sm:text-2xl">{{ $class->name ?? '-' }}</h1>
+            <p class="mt-0.5 truncate text-sm text-gray-500">{{ $class->major?->code ?? '' }} &middot; {{ $class->students_count ?? 0 }} siswa</p>
         </div>
         <div class="flex gap-2">
-            <a href="{{ route('teacher.attendance') }}?class={{ $class->id }}">
-                <x-button variant="primary" size="sm">
+            <a href="{{ route('teacher.attendance') }}?class={{ $class->id }}" class="w-full sm:w-auto">
+                <x-button variant="primary" size="sm" class="min-h-[44px] w-full sm:w-auto">
                     <svg class="h-4 w-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/></svg>
                     Absensi
                 </x-button>
@@ -34,6 +34,31 @@
             <x-search-input name="search" placeholder="Cari siswa..." />
         </div>
 
+        {{-- Mobile cards --}}
+        <div class="space-y-2 md:hidden">
+            @forelse($students ?? [] as $index => $student)
+                <a href="{{ route('teacher.students.show', $student->id) }}" class="block rounded-xl border border-gray-100 bg-white p-3 shadow-sm active:bg-gray-50">
+                    <div class="flex items-center gap-3">
+                        <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary-50 text-xs font-bold text-primary-700">{{ substr($student->name ?? '?', 0, 1) }}</span>
+                        <div class="min-w-0 flex-1">
+                            <p class="truncate text-sm font-semibold text-gray-900">{{ $student->name ?? '-' }}</p>
+                            <p class="font-mono text-xs text-gray-500">{{ $student->nis ?? '-' }}</p>
+                        </div>
+                        <svg class="h-4 w-4 shrink-0 text-gray-300" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5"/></svg>
+                    </div>
+                    <div class="mt-2.5 grid grid-cols-4 gap-1.5 text-center">
+                        <span class="rounded-lg bg-green-50 px-1 py-1.5 text-xs font-bold text-green-700">{{ $student->attendance_summary['present'] ?? 0 }}<span class="block text-[9px] font-medium">Hadir</span></span>
+                        <span class="rounded-lg bg-yellow-50 px-1 py-1.5 text-xs font-bold text-yellow-700">{{ $student->attendance_summary['excused'] ?? 0 }}<span class="block text-[9px] font-medium">Izin</span></span>
+                        <span class="rounded-lg bg-blue-50 px-1 py-1.5 text-xs font-bold text-blue-700">{{ $student->attendance_summary['sick'] ?? 0 }}<span class="block text-[9px] font-medium">Sakit</span></span>
+                        <span class="rounded-lg bg-red-50 px-1 py-1.5 text-xs font-bold text-red-700">{{ $student->attendance_summary['absent'] ?? 0 }}<span class="block text-[9px] font-medium">Alfa</span></span>
+                    </div>
+                </a>
+            @empty
+                <x-empty-state title="Belum ada siswa" description="Kelas ini belum memiliki siswa terdaftar." />
+            @endforelse
+        </div>
+
+        <div class="hidden md:block">
         <x-table>
             <thead>
                 <tr>
@@ -92,6 +117,7 @@
                 @endforelse
             </tbody>
         </x-table>
+        </div>
 
         @if(isset($students) && $students instanceof \Illuminate\Pagination\LengthAwarePaginator)
             <div class="mt-4">

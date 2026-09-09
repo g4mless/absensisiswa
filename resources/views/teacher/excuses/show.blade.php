@@ -5,17 +5,17 @@
 @endsection
 
 @section('content')
-<div class="space-y-6">
-    <div class="flex items-center gap-2 mb-1">
-        <a href="{{ route('teacher.excuses') }}" class="text-sm text-gray-500 hover:text-primary-600 transition-colors">Surat Izin</a>
-        <svg class="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5"/></svg>
+<div class="space-y-4 sm:space-y-6">
+    <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar whitespace-nowrap">
+        <a href="{{ route('teacher.excuses') }}" class="inline-flex min-h-[44px] items-center shrink-0 text-sm text-gray-500 hover:text-primary-600 transition-colors">Surat Izin</a>
+        <svg class="h-4 w-4 shrink-0 text-gray-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5"/></svg>
         <span class="text-sm font-medium text-gray-900">Detail</span>
     </div>
 
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-            <h1 class="text-2xl font-bold text-gray-900">Detail Surat Izin</h1>
-            <p class="text-gray-500">{{ $excuse->student->name ?? '-' }} &middot; {{ $excuse->date ? \Carbon\Carbon::parse($excuse->date)->format('d M Y') : '-' }}</p>
+    <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+        <div class="min-w-0">
+            <h1 class="truncate text-xl font-bold text-gray-900 sm:text-2xl">Detail Surat Izin</h1>
+            <p class="mt-0.5 truncate text-sm text-gray-500">{{ $excuse->student->name ?? '-' }} &middot; {{ $excuse->date ? \Carbon\Carbon::parse($excuse->date)->format('d M Y') : '-' }}</p>
         </div>
         <x-badge variant="{{ $excuse->status === 'pending' ? 'warning' : ($excuse->status === 'approved' ? 'success' : 'danger') }}" class="text-sm px-3 py-1.5">
             {{ ucfirst($excuse->status) }}
@@ -32,8 +32,8 @@
         </x-alert>
     @endif
 
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div class="lg:col-span-2 space-y-6">
+    <div class="grid grid-cols-1 gap-4 sm:gap-6 lg:grid-cols-3">
+        <div class="lg:col-span-2 space-y-4 sm:space-y-6">
             <x-card>
                 <x-slot name="header">Informasi Surat</x-slot>
 
@@ -105,11 +105,11 @@
                         <form method="POST" action="{{ route('teacher.excuses.reject', $excuse->id) }}">
                             @csrf
                             <x-textarea label="Alasan Penolakan" name="reason" :rows="3" placeholder="Masukkan alasan penolakan (opsional)" />
-                            <div class="flex gap-2 mt-3">
-                                <button type="submit" formaction="{{ route('teacher.excuses.approve', $excuse->id) }}" class="flex-1 inline-flex items-center justify-center rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700">
+                            <div class="mt-3 grid grid-cols-2 gap-2">
+                                <button type="submit" formaction="{{ route('teacher.excuses.approve', $excuse->id) }}" class="flex min-h-[44px] items-center justify-center rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700">
                                     Setujui
                                 </button>
-                                <x-button type="submit" variant="danger" class="flex-1">
+                                <x-button type="submit" variant="danger" class="min-h-[44px] w-full">
                                     Tolak
                                 </x-button>
                             </div>

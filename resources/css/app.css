@@ -492,6 +492,29 @@
     margin-top: 0.25rem;
 }
 
+/* === Mobile optimizations for /teacher === */
+@layer utilities {
+    .no-scrollbar::-webkit-scrollbar {
+        display: none;
+    }
+    .no-scrollbar {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }
+}
+
+@media (max-width: 639px) {
+    /* Larger tap targets for attendance radios */
+    input[type="radio"].attendance-radio {
+        min-height: 2.75rem;
+        min-width: 2.75rem;
+    }
+    /* Sticky mobile action bar safe-area */
+    .mobile-sticky-bar {
+        padding-bottom: env(safe-area-inset-bottom);
+    }
+}
+
 @media (prefers-color-scheme: dark) {
     :root {
         color-scheme: dark;

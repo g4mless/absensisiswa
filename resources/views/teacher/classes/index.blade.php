@@ -5,15 +5,15 @@
 @endsection
 
 @section('content')
-<div class="space-y-6">
+<div class="space-y-4 sm:space-y-6">
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-            <h1 class="text-2xl font-bold text-gray-900">Kelas Saya</h1>
-            <p class="text-gray-500">Daftar kelas yang Anda ajar</p>
+            <h1 class="text-xl font-bold text-gray-900 sm:text-2xl">Kelas Saya</h1>
+            <p class="mt-0.5 text-sm text-gray-500">Daftar kelas yang Anda ajar</p>
         </div>
     </div>
 
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+    <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3">
         @forelse($classes ?? [] as $class)
             <x-card>
                 <div class="flex items-start justify-between">
@@ -36,8 +36,8 @@
                 </div>
 
                 <div class="mt-4 pt-4 border-t border-gray-100">
-                    <a href="{{ route('teacher.classes.show', $class->id) }}">
-                        <x-button variant="ghost" size="sm" class="w-full">Lihat Detail</x-button>
+                    <a href="{{ route('teacher.classes.show', $class->id) }}" class="block">
+                        <x-button variant="ghost" size="sm" class="min-h-[44px] w-full">Lihat Detail</x-button>
                     </a>
                 </div>
             </x-card>

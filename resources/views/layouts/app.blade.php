@@ -33,12 +33,12 @@
         @yield('sidebar')
 
         {{-- Main content area --}}
-        <div class="flex flex-1 flex-col lg:pl-72">
+        <div class="flex min-w-0 flex-1 flex-col lg:pl-72">
             {{-- Topbar --}}
             @include('partials.topbar')
 
             {{-- Page content --}}
-            <main class="flex-1 px-4 py-6 sm:px-6 lg:px-8">
+            <main class="flex-1 overflow-x-clip px-3 py-4 sm:px-6 lg:px-8 lg:py-6">
                 @yield('content')
             </main>
         </div>

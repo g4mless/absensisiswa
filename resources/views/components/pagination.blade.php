@@ -70,9 +70,9 @@
 
         <div class="flex flex-1 items-center justify-between sm:hidden">
             @if($paginator->onFirstPage())
-                <span class="relative inline-flex items-center rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-300 cursor-not-allowed">Sebelumnya</span>
+                <span class="relative inline-flex items-center rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-300 cursor-not-allowed min-h-[44px]">Sebelumnya</span>
             @else
-                <a href="{{ $paginator->previousPageUrl() }}" class="relative inline-flex items-center rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">Sebelumnya</a>
+                <a href="{{ $paginator->previousPageUrl() }}" class="relative inline-flex items-center rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors min-h-[44px]">Sebelumnya</a>
             @endif
 
             <p class="text-sm text-gray-700">
@@ -80,9 +80,9 @@
             </p>
 
             @if($paginator->hasMorePages())
-                <a href="{{ $paginator->nextPageUrl() }}" class="relative inline-flex items-center rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">Selanjutnya</a>
+                <a href="{{ $paginator->nextPageUrl() }}" class="relative inline-flex items-center rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors min-h-[44px]">Selanjutnya</a>
             @else
-                <span class="relative inline-flex items-center rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-300 cursor-not-allowed">Selanjutnya</span>
+                <span class="relative inline-flex items-center rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-300 cursor-not-allowed min-h-[44px]">Selanjutnya</span>
             @endif
         </div>
     </nav>
