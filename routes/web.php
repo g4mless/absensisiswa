@@ -89,8 +89,6 @@ Route::prefix('teacher')->name('teacher.')->middleware(['auth'])->group(function
     Route::get('/students/{id}', [TeacherController::class, 'showStudent'])->name('students.show');
     Route::get('/excuses', [TeacherController::class, 'excuses'])->name('excuses');
     Route::get('/excuses/{id}', [TeacherController::class, 'showExcuse'])->name('excuses.show');
-    Route::post('/excuses/{id}/approve', [TeacherController::class, 'approveExcuse'])->name('excuses.approve');
-    Route::post('/excuses/{id}/reject', [TeacherController::class, 'rejectExcuse'])->name('excuses.reject');
     Route::get('/reports', [TeacherController::class, 'reports'])->name('reports');
     Route::get('/profile', fn() => view('teacher.profile'))->name('profile');
 });

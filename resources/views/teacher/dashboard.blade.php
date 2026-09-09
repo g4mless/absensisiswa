@@ -15,7 +15,7 @@
         <x-stat-card title="Kelas Saya" value="{{ $totalClasses ?? 0 }}" icon="users" />
         <x-stat-card title="Sesi Hari Ini" value="{{ $todaySessions ?? 0 }}" icon="calendar" />
         <x-stat-card title="Siswa Hadir" value="{{ $studentsPresentToday ?? 0 }}" icon="check-circle" trend="up" trendValue="{{ $attendanceRate ?? '0%' }}" />
-        <x-stat-card title="Surat Izin Pending" value="{{ $pendingExcuses ?? 0 }}" icon="document" />
+        <x-stat-card title="Surat Izin Terkirim" value="{{ $totalExcuses ?? $pendingExcuses ?? 0 }}" icon="document" />
     </div>
 
     <div class="grid grid-cols-1 gap-4 sm:gap-6 lg:grid-cols-3">
@@ -71,15 +71,13 @@
                 <x-slot name="header">Surat Izin Terbaru</x-slot>
                 <div class="space-y-3">
                     @foreach($recentExcuses as $excuse)
-                        <div class="flex items-center justify-between rounded-lg border border-gray-100 p-3">
+                        <a href="{{ route('teacher.excuses.show', $excuse->id) }}" class="flex items-center justify-between rounded-lg border border-gray-100 p-3 hover:bg-gray-50 transition-colors">
                             <div class="min-w-0">
                                 <p class="text-sm font-medium text-gray-900 truncate">{{ $excuse->student->name ?? '-' }}</p>
-                                <p class="text-xs text-gray-500">{{ $excuse->date ? \Carbon\Carbon::parse($excuse->date)->format('d M Y') : '-' }}</p>
+                                <p class="text-xs text-gray-500">{{ $excuse->date ? \Carbon\Carbon::parse($excuse->date)->format('d M Y') : '-' }} &middot; {{ $excuse->type ?? '-' }}</p>
                             </div>
-                            <x-badge variant="{{ $excuse->status === 'pending' ? 'warning' : ($excuse->status === 'approved' ? 'success' : 'danger') }}">
-                                {{ ucfirst($excuse->status) }}
-                            </x-badge>
-                        </div>
+                            <svg class="h-4 w-4 shrink-0 text-gray-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5"/></svg>
+                        </a>
                     @endforeach
                 </div>
             </x-card>

@@ -75,9 +75,8 @@ class TeacherController extends Controller
             ? round($studentsPresentToday / $totalStudents * 100).'%'
             : '0%';
 
-        $pendingExcuses = $classIds
+        $totalExcuses = $classIds
             ? Excuse::whereHas('student', fn ($q) => $q->whereIn('class_id', $classIds))
-                ->where('status', 'pending')
                 ->count()
             : 0;
 
@@ -89,9 +88,10 @@ class TeacherController extends Controller
                 ->get()
             : collect();
 
+        $pendingExcuses = $totalExcuses; // backward compat for view lama
         return view('teacher.dashboard', compact(
             'todaySchedule', 'recentExcuses', 'totalClasses',
-            'todaySessions', 'studentsPresentToday', 'pendingExcuses', 'attendanceRate'
+            'todaySessions', 'studentsPresentToday', 'totalExcuses', 'pendingExcuses', 'attendanceRate'
         ));
     }
 
@@ -442,26 +442,18 @@ class TeacherController extends Controller
 
         $query = Excuse::with(['student.user', 'student.class'])
             ->whereHas('student', fn ($q) => $q->whereIn('class_id', $classIds ?: [-1]))
-            ->when($request->filled('status'), fn ($q) => $q->where('status', $request->input('status')))
             ->when($request->filled('search'), function ($q) use ($request) {
                 $search = $request->input('search');
-                $q->whereHas('student.user', fn ($u) => $u->where('name', 'like', "%{$search}%"))
-                    ->orWhere('reason', 'like', "%{$search}%");
+                $q->where(function ($w) use ($search) {
+                    $w->whereHas('student.user', fn ($u) => $u->where('name', 'like', "%{$search}%"))
+                        ->orWhere('reason', 'like', "%{$search}%");
+                });
             })
             ->orderByDesc('date');
 
         $excuses = $query->paginate(15)->withQueryString();
 
-        // Opsi siswa untuk modal upload.
-        $studentOptions = $classIds
-            ? \App\Models\Student::with('user')
-                ->whereIn('class_id', $classIds)
-                ->get()
-                ->mapWithKeys(fn ($s) => [$s->id => ($s->user->name ?? $s->nis)])
-                ->all()
-            : [];
-
-        return view('teacher.excuses.index', compact('excuses', 'studentOptions'));
+        return view('teacher.excuses.index', compact('excuses'));
     }
 
     public function showExcuse($id)
@@ -472,40 +464,6 @@ class TeacherController extends Controller
         $excuse->student?->setRelation('classroom', $excuse->student->class);
 
         return view('teacher.excuses.show', compact('excuse'));
-    }
-
-    public function approveExcuse($id)
-    {
-        $excuse = $this->scopedExcuse((int) $id);
-        $excuse->update([
-            'status' => 'approved',
-            'reviewed_by' => auth()->id(),
-            'reject_reason' => null,
-        ]);
-
-        return redirect()->route('teacher.excuses')->with('success', 'Surat izin disetujui.');
-    }
-
-    public function rejectExcuse(Request $request, $id)
-    {
-        $excuse = $this->scopedExcuse((int) $id);
-        $data = $request->validate(['reason' => ['nullable', 'string', 'max:1000']]);
-        $excuse->update([
-            'status' => 'rejected',
-            'reviewed_by' => auth()->id(),
-            'reject_reason' => $data['reason'] ?? null,
-        ]);
-
-        return redirect()->route('teacher.excuses')->with('success', 'Surat izin ditolak.');
-    }
-
-    private function scopedExcuse(int $id): Excuse
-    {
-        $classIds = $this->teacherClassIds();
-        $excuse = Excuse::with('student')->findOrFail($id);
-        abort_unless(in_array((int) $excuse->student?->class_id, $classIds), 403);
-
-        return $excuse;
     }
 
     public function reports(Request $request)
