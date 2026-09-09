@@ -13,6 +13,17 @@ return new class extends Migration
             $table->text('address')->nullable()->after('phone');
         });
 
+        // SQLite (test env) tidak bisa rebuild tabel selama index unik kolom
+        // yang di-drop masih ada: hapus index-nya dulu. No-op di pgsql.
+        if (Schema::getConnection()->getDriverName() === 'sqlite') {
+            try {
+                Schema::table('users', function (Blueprint $table) {
+                    $table->dropUnique(['email']);
+                });
+            } catch (\Throwable $e) {
+            }
+        }
+
         Schema::table('users', function (Blueprint $table) {
             $table->dropColumn(['email', 'email_verified_at']);
         });

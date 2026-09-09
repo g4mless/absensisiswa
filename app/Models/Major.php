@@ -15,9 +15,4 @@ class Major extends Model
     {
         return $this->hasMany(ClassModel::class);
     }
-
-    public function programHeads()
-    {
-        return $this->hasMany(ProgramHead::class);
-    }
 }

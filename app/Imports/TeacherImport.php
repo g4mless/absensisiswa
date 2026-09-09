@@ -6,7 +6,6 @@ use App\Models\ClassModel;
 use App\Models\HomeroomTeacher;
 use App\Models\Major;
 use App\Models\PklSupervisor;
-use App\Models\ProgramHead;
 use App\Models\Schedule;
 use App\Models\Subject;
 use App\Models\Teacher;
@@ -221,22 +220,6 @@ class TeacherImport
                 $class = $this->class(['10' => 'X', '11' => 'XI', '12' => 'XII'][$parts[1]], $parts[2], $parts[3]);
                 HomeroomTeacher::updateOrCreate(['class_id' => $class->id], ['teacher_id' => $teacher->id]);
             }
-        }
-
-        for ($row = 3; $row <= 8; $row++) {
-            $majorCode = strtoupper(trim((string) $sheet->getCell("C$row")->getValue()));
-            $teacherName = trim((string) $sheet->getCell("B$row")->getValue());
-            if ($majorCode === '' || $teacherName === '') {
-                continue;
-            }
-
-            $teacher = $this->teacherByName($teacherName, $nips);
-            if (! $teacher) {
-                throw new RuntimeException("Kaprog tidak ditemukan: $teacherName");
-            }
-
-            $major = Major::firstOrCreate(['code' => $majorCode], ['name' => $majorCode]);
-            ProgramHead::updateOrCreate(['major_id' => $major->id], ['teacher_id' => $teacher->id]);
         }
     }
 

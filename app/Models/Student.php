@@ -31,6 +31,35 @@ class Student extends Model
         return $this->hasMany(Attendance::class);
     }
 
+    public function dailyAttendances()
+    {
+        return $this->hasMany(DailyAttendance::class);
+    }
+
+    /** Penempatan PKL (satu siswa = satu record aktif, PRD pasal 12). */
+    public function pklPlacement()
+    {
+        return $this->hasOne(StudentPkl::class);
+    }
+
+    /** Alias agar view lama ($student->pkl) tetap jalan. */
+    public function pkl()
+    {
+        return $this->hasOne(StudentPkl::class);
+    }
+
+    public function pklLocationLogs()
+    {
+        return $this->hasManyThrough(
+            PklLocationLog::class,
+            StudentPkl::class,
+            'student_id',
+            'student_pkl_id',
+            'id',
+            'id'
+        );
+    }
+
     public function getNameAttribute()
     {
         return $this->user->name ?? '-';

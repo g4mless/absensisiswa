@@ -10,7 +10,7 @@ class DailyAttendance extends Model
     use HasFactory;
 
     protected $fillable = [
-        'student_id', 'date', 'status', 'check_in_time',
+        'student_id', 'date', 'status', 'check_in_time', 'check_out_time',
         'latitude', 'longitude', 'accuracy', 'source', 'selfie_path',
     ];
 

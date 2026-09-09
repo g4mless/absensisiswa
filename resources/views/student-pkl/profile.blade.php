@@ -99,27 +99,6 @@
                 </form>
             </x-card>
 
-            {{-- Change Password --}}
-            <x-card>
-                <x-slot name="header">Ubah Password</x-slot>
-                <x-slot name="subtitle">Pastikan menggunakan password yang kuat</x-slot>
-
-                <form method="POST" action="{{ route('student-pkl.profile.password') }}" class="space-y-4">
-                    @csrf
-                    @method('PUT')
-
-                    <x-input label="Password Saat Ini" name="current_password" type="password" required />
-
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <x-input label="Password Baru" name="password" type="password" required />
-                        <x-input label="Konfirmasi Password" name="password_confirmation" type="password" required />
-                    </div>
-
-                    <div class="flex justify-end">
-                        <x-button type="submit" variant="secondary">Ubah Password</x-button>
-                    </div>
-                </form>
-            </x-card>
         </div>
     </div>
 </div>

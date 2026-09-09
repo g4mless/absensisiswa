@@ -33,9 +33,15 @@ class Teacher extends Model
         return $this->hasMany(Schedule::class);
     }
 
-    public function programHead()
+    /** Penempatan PKL yang dibimbing guru ini (PRD pasal 12: student_pkl.pembimbing_id). */
+    public function supervisedPkl()
     {
-        return $this->hasOne(ProgramHead::class);
+        return $this->hasMany(StudentPkl::class, 'pembimbing_id');
+    }
+
+    public function supervisedPkls()
+    {
+        return $this->hasMany(StudentPkl::class, 'pembimbing_id');
     }
 
     public function getNameAttribute()

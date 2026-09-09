@@ -21,11 +21,22 @@ class MajorController extends Controller
 
     public function store(Request $request)
     {
-        Major::create($request->validate([
+        $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'code' => ['required', 'string', 'max:255', 'unique:majors,code'],
-        ]));
-        return redirect()->route('admin.majors.index');
+        ]);
+
+        $major = Major::create($validated);
+
+        if ($request->wantsJson() || $request->ajax()) {
+            return response()->json($major, 201);
+        }
+
+        if ($redirect = $request->input('redirect')) {
+            return redirect($redirect)->with('success', 'Jurusan berhasil dibuat.');
+        }
+
+        return redirect()->route('admin.majors.index')->with('success', 'Jurusan berhasil dibuat.');
     }
 
     public function show($id)

@@ -7,7 +7,7 @@
 @section('content')
 <div class="space-y-6">
     <div class="flex items-center gap-4">
-        <a href="{{ route('pkl-supervisor.students.index') }}" class="inline-flex items-center justify-center rounded-lg p-2 text-gray-500 hover:bg-gray-100">
+        <a href="{{ route('pkl-supervisor.students') }}" class="inline-flex items-center justify-center rounded-lg p-2 text-gray-500 hover:bg-gray-100">
             <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18"/>
             </svg>
@@ -55,7 +55,7 @@
                     </div>
                     <div class="flex justify-between border-b border-gray-100 py-2">
                         <span class="text-sm text-gray-500">Status</span>
-                        @if(($student->pkl->status ?? null) === 'active')
+                        @if(strtoupper($student->pkl->status ?? '') === 'ACTIVE')
                             <x-badge variant="success">Aktif</x-badge>
                         @else
                             <x-badge variant="neutral">Selesai</x-badge>

@@ -12,26 +12,35 @@
     </div>
 
     <div x-data="gpsTracker()" x-init="init()">
-        {{-- GPS Connection Status --}}
+        {{-- Status GPS + WebSocket --}}
         <x-card>
             <x-slot name="header">Status Koneksi</x-slot>
-            <div class="flex items-center justify-between">
+            <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <div class="flex items-center gap-3">
                     <div class="flex h-3 w-3">
                         <span class="absolute inline-flex h-3 w-3 animate-ping rounded-full opacity-75"
-                              :class="connected ? 'bg-green-400' : 'bg-red-400'"></span>
+                              :class="gpsFix ? 'bg-green-400' : 'bg-red-400'"></span>
                         <span class="relative inline-flex h-3 w-3 rounded-full"
-                              :class="connected ? 'bg-green-500' : 'bg-red-500'"></span>
+                              :class="gpsFix ? 'bg-green-500' : 'bg-red-500'"></span>
                     </div>
                     <div>
-                        <p class="text-sm font-medium" :class="connected ? 'text-green-700' : 'text-red-700'"
-                           x-text="connected ? 'Terhubung' : 'Terputus'"></p>
-                        <p class="text-xs text-gray-500">WebSocket / Reverb Connection</p>
+                        <p class="text-base font-medium" :class="gpsFix ? 'text-green-700' : 'text-red-700'"
+                           x-text="gpsFix ? 'GPS Aktif' : 'GPS Terputus'"></p>
+                        <p class="text-sm text-gray-500" x-show="accuracy" x-text="'Akurasi ±' + Math.round(accuracy) + ' m'"></p>
                     </div>
                 </div>
-                <button @click="toggleConnection()" class="text-sm font-medium"
-                        :class="connected ? 'text-red-600 hover:text-red-500' : 'text-green-600 hover:text-green-500'"
-                        x-text="connected ? 'Putuskan' : 'Hubungkan'">
+                <div class="flex items-center gap-2">
+                    <span x-show="wsStatus === 'connected'" class="md-badge md-badge-success">LIVE WEBSOCKET</span>
+                    <span x-show="wsStatus === 'fallback'" class="md-badge md-badge-warning">MODE POLLING 20 dtk</span>
+                    <span x-show="wsStatus === 'disconnected'" class="md-badge md-badge-danger">WS TERPUTUS</span>
+                    <span x-show="isStale" class="md-badge md-badge-warning">STALE &gt; 2 mnt</span>
+                </div>
+            </div>
+            <p class="mt-2 text-sm text-gray-500" x-show="lastSentAt" x-text="'Terakhir terkirim: ' + lastSentAt"></p>
+            <div class="mt-3 flex gap-2">
+                <button type="button" @click="toggleTracking()" class="inline-flex min-h-[48px] items-center rounded-xl px-4 py-3 text-base font-medium"
+                        :class="tracking ? 'text-red-600 hover:text-red-500' : 'text-green-600 hover:text-green-500'"
+                        x-text="tracking ? 'Hentikan GPS' : 'Aktifkan GPS'">
                 </button>
             </div>
         </x-card>
@@ -49,20 +58,13 @@
 
                 <div class="text-center">
                     <p class="text-sm font-medium text-gray-500">Latitude</p>
-                    <p class="text-lg font-bold text-gray-900" x-text="latitude || '---'"></p>
+                    <p class="text-xl font-bold text-gray-900" x-text="latitude || '---'"></p>
                 </div>
 
                 <div class="text-center">
                     <p class="text-sm font-medium text-gray-500">Longitude</p>
-                    <p class="text-lg font-bold text-gray-900" x-text="longitude || '---'"></p>
+                    <p class="text-xl font-bold text-gray-900" x-text="longitude || '---'"></p>
                 </div>
-
-                @if($gpsAccuracy ?? null)
-                    <div class="text-center">
-                        <p class="text-sm font-medium text-gray-500">Akurasi</p>
-                        <p class="text-sm text-gray-700">{{ number_format($gpsAccuracy, 1) }} meter</p>
-                    </div>
-                @endif
             </div>
         </x-card>
 
@@ -70,14 +72,14 @@
         <x-card>
             <div class="flex flex-col items-center gap-4">
                 <div x-show="sendStatus" x-transition class="w-full">
-                    <x-alert :variant="sendType" x-text="sendStatus" dismissible />
+                    <x-alert variant="info" x-text="sendStatus" dismissible />
                 </div>
 
                 <button
                     type="button"
                     @click="sendLocation()"
                     :disabled="sending || !latitude"
-                    class="inline-flex items-center gap-2 rounded-xl bg-green-600 px-6 py-3 font-semibold text-white shadow-lg shadow-green-200 transition-all hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                    class="inline-flex min-h-[48px] items-center justify-center gap-2 rounded-xl bg-green-600 px-6 py-3 text-base font-semibold text-white shadow-lg shadow-green-200 transition-all hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                     <template x-if="sending">
                         <svg class="h-5 w-5 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -94,28 +96,14 @@
                 </button>
 
                 {{-- Auto-send toggle --}}
-                <div class="flex items-center gap-3">
+                <div class="flex min-h-[48px] items-center gap-3">
                     <label class="relative inline-flex cursor-pointer items-center">
                         <input type="checkbox" x-model="autoSend" class="peer sr-only">
                         <div class="h-6 w-11 rounded-full bg-gray-200 after:absolute after:left-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:bg-white after:transition-all peer-checked:bg-primary-600 peer-checked:after:translate-x-full"></div>
                     </label>
-                    <span class="text-sm text-gray-600">Kirim lokasi otomatis</span>
+                    <span class="text-base text-gray-600">Kirim lokasi otomatis</span>
                 </div>
-                <p x-show="autoSend" class="text-xs text-gray-500">Lokasi akan dikirim setiap 30 detik</p>
-            </div>
-        </x-card>
-
-        {{-- Map Placeholder --}}
-        <x-card>
-            <x-slot name="header">Peta</x-slot>
-            <div class="flex h-64 items-center justify-center rounded-lg border-2 border-dashed border-gray-200 bg-gray-50">
-                <div class="text-center">
-                    <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke-width="1" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 6.75V15m6-6v8.25m.503 3.498l4.875-2.437c.381-.19.622-.58.622-1.006V4.82c0-.836-.88-1.38-1.628-1.006l-3.869 1.934c-.317.159-.69.159-1.006 0L9.503 3.252a1.125 1.125 0 00-1.006 0L3.622 5.689C3.24 5.88 3 6.27 3 6.695V19.18c0 .836.88 1.38 1.628 1.006l3.869-1.934c.317-.159.69-.159 1.006 0l4.994 2.497c.317.158.69.158 1.006 0z"/>
-                    </svg>
-                    <p class="mt-2 text-sm text-gray-500">Peta akan ditampilkan di sini</p>
-                    <p class="text-xs text-gray-400">Integrasikan dengan Google Maps / Leaflet</p>
-                </div>
+                <p x-show="autoSend" class="text-sm text-gray-500">Lokasi dikirim otomatis setiap 20 detik (10–30 dtk sesuai PRD)</p>
             </div>
         </x-card>
 
@@ -135,7 +123,7 @@
                 <tbody>
                     @forelse($locationHistory ?? [] as $loc)
                         <tr>
-                            <td>{{ \Carbon\Carbon::parse($loc->created_at)->format('H:i:s') }}</td>
+                            <td>{{ \Carbon\Carbon::parse($loc->recorded_at ?? $loc->created_at)->format('H:i:s') }}</td>
                             <td>{{ $loc->latitude }}</td>
                             <td>{{ $loc->longitude }}</td>
                         </tr>
@@ -159,16 +147,56 @@ function gpsTracker() {
         latitude: null,
         longitude: null,
         accuracy: null,
-        connected: false,
+        gpsFix: false,
+        tracking: false,
+        wsStatus: 'disconnected', // connected | fallback | disconnected
+        isStale: false,
+        lastSentAt: null,
+        lastSentTs: null,
         sending: false,
         sendStatus: '',
         sendType: 'info',
         autoSend: false,
         watchId: null,
         autoSendInterval: null,
+        staleTimer: null,
 
         init() {
             this.startTracking();
+            this.detectEcho();
+
+            // Auto-send 20 detik saat toggle aktif (PRD: 10–30 detik).
+            this.$watch('autoSend', (value) => {
+                if (value) {
+                    this.sendLocation();
+                    this.autoSendInterval = setInterval(() => {
+                        if (this.latitude && this.longitude) this.sendLocation();
+                    }, 20000);
+                } else if (this.autoSendInterval) {
+                    clearInterval(this.autoSendInterval);
+                    this.autoSendInterval = null;
+                }
+            });
+
+            // Tandai stale bila kiriman terakhir > 2 menit.
+            this.staleTimer = setInterval(() => {
+                this.isStale = this.lastSentTs ? (Date.now() - this.lastSentTs > 120000) : false;
+            }, 10000);
+        },
+
+        detectEcho() {
+            const update = () => {
+                if (window.Echo) {
+                    this.wsStatus = 'connected';
+                } else {
+                    // Echo belum siap (ENV/package belum dikonfigurasi) -> kirim HTTP tetap jalan (fallback).
+                    this.wsStatus = 'fallback';
+                }
+            };
+            update();
+            window.addEventListener('echo:connected', () => { this.wsStatus = 'connected'; });
+            window.addEventListener('echo:disconnected', () => { this.wsStatus = 'disconnected'; });
+            setTimeout(update, 3000);
         },
 
         startTracking() {
@@ -178,27 +206,29 @@ function gpsTracker() {
                 return;
             }
 
+            this.tracking = true;
             this.watchId = navigator.geolocation.watchPosition(
                 (position) => {
                     this.latitude = position.coords.latitude.toFixed(6);
                     this.longitude = position.coords.longitude.toFixed(6);
                     this.accuracy = position.coords.accuracy;
-                    this.connected = true;
+                    this.gpsFix = true;
                 },
                 (error) => {
-                    this.connected = false;
+                    this.gpsFix = false;
                 },
                 { enableHighAccuracy: true, timeout: 10000, maximumAge: 5000 }
             );
         },
 
-        toggleConnection() {
-            if (this.connected) {
-                if (this.watchId) {
+        toggleTracking() {
+            if (this.tracking) {
+                if (this.watchId !== null) {
                     navigator.geolocation.clearWatch(this.watchId);
                     this.watchId = null;
                 }
-                this.connected = false;
+                this.tracking = false;
+                this.gpsFix = false;
             } else {
                 this.startTracking();
             }
@@ -211,7 +241,7 @@ function gpsTracker() {
             this.sendStatus = '';
 
             try {
-                const response = await fetch('{{ route("student-pkl.location.store") }}', {
+                const response = await fetch(@json(route('student-pkl.location.send')), {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -230,6 +260,9 @@ function gpsTracker() {
                 if (response.ok) {
                     this.sendStatus = data.message || 'Lokasi berhasil dikirim!';
                     this.sendType = 'success';
+                    this.lastSentTs = Date.now();
+                    this.lastSentAt = data.recorded_at || new Date().toLocaleTimeString('id-ID');
+                    this.isStale = false;
                 } else {
                     this.sendStatus = data.message || 'Gagal mengirim lokasi';
                     this.sendType = 'danger';
@@ -243,26 +276,6 @@ function gpsTracker() {
         }
     };
 }
-</script>
-
-<script>
-document.addEventListener('alpine:init', () => {
-    Alpine.effect(() => {
-        const tracker = Alpine.store('gpsTracker');
-        if (tracker && tracker.autoSend) {
-            if (!tracker.autoSendInterval) {
-                tracker.autoSendInterval = setInterval(() => {
-                    tracker.sendLocation();
-                }, 30000);
-            }
-        } else {
-            if (tracker && tracker.autoSendInterval) {
-                clearInterval(tracker.autoSendInterval);
-                tracker.autoSendInterval = null;
-            }
-        }
-    });
-});
 </script>
 @endpush
 @endsection

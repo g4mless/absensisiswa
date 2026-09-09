@@ -5,53 +5,62 @@
 @endsection
 
 @section('content')
-<div class="space-y-6">
-    <div>
-        <h1 class="text-2xl font-bold text-gray-900">Lokasi Siswa PKL</h1>
-        <p class="text-gray-500">Pantau lokasi GPS semua siswa PKL</p>
-    </div>
-
-    {{-- Map Placeholder --}}
-    <x-card elevated>
-        <x-slot name="header">Peta Lokasi</x-slot>
-        <div class="flex h-96 items-center justify-center rounded-lg border-2 border-dashed border-gray-200 bg-gray-50">
-            <div class="text-center">
-                <svg class="mx-auto h-16 w-16 text-gray-400" fill="none" viewBox="0 0 24 24" stroke-width="1" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 6.75V15m6-6v8.25m.503 3.498l4.875-2.437c.381-.19.622-.58.622-1.006V4.82c0-.836-.88-1.38-1.628-1.006l-3.869 1.934c-.317.159-.69.159-1.006 0L9.503 3.252a1.125 1.125 0 00-1.006 0L3.622 5.689C3.24 5.88 3 6.27 3 6.695V19.18c0 .836.88 1.38 1.628 1.006l3.869-1.934c.317-.159.69-.159 1.006 0l4.994 2.497c.317.158.69.158 1.006 0z"/>
-                </svg>
-                <p class="mt-3 text-sm text-gray-500">Peta lokasi semua siswa</p>
-                <p class="text-xs text-gray-400">Integrasikan dengan Google Maps / Leaflet</p>
-            </div>
+<div class="space-y-6" x-data="supervisorLocations()" x-init="init()">
+    <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-900">Lokasi Siswa PKL</h1>
+            <p class="text-gray-500">Pantau lokasi GPS semua siswa PKL</p>
         </div>
-    </x-card>
+        <div class="flex items-center gap-2">
+            <span x-show="realtime" class="md-badge md-badge-success">LIVE WEBSOCKET</span>
+            <span x-show="!realtime" class="md-badge md-badge-warning">POLLING 30 dtk</span>
+        </div>
+    </div>
+    <p x-show="!realtime" class="text-sm text-gray-500">Realtime tidak tersedia (Reverb belum jalan) — data diperbarui otomatis tiap 30 detik.</p>
 
     {{-- Students Location List --}}
     <x-card>
         <x-slot name="header">Lokasi Terkini</x-slot>
         <x-slot name="subtitle">Lokasi terakhir dari setiap siswa</x-slot>
 
+        <div class="overflow-x-auto">
         <x-table>
             <thead>
                 <tr>
                     <th>Siswa</th>
                     <th>Latitude</th>
                     <th>Longitude</th>
+                    <th>Status</th>
                     <th>Terakhir Update</th>
                     <th>Aksi</th>
                 </tr>
             </thead>
             <tbody>
                 @forelse($studentLocations ?? [] as $location)
-                    <tr>
+                    @php
+                        $channelKey = $location->student_pkl_id ?? ('s'.($location->student_id ?? ''));
+                        $recordedAt = $location->recorded_at ?? $location->created_at ?? null;
+                        $isStale = $recordedAt ? \Carbon\Carbon::parse($recordedAt)->lt(now()->subMinutes(2)) : true;
+                    @endphp
+                    <tr data-loc-row="{{ $channelKey }}"
+                        data-channel="{{ $channelKey }}"
+                        data-recorded-at="{{ $recordedAt ? \Carbon\Carbon::parse($recordedAt)->toDateTimeString() : '' }}">
                         <td>
                             <div>
                                 <p class="text-sm font-medium text-gray-900">{{ $location->student->user->name ?? '-' }}</p>
                                 <p class="text-xs text-gray-500">{{ $location->student->nis ?? '-' }}</p>
                             </div>
                         </td>
-                        <td class="text-sm text-gray-600">{{ $location->latitude }}</td>
-                        <td class="text-sm text-gray-600">{{ $location->longitude }}</td>
-                        <td class="text-sm text-gray-500">{{ \Carbon\Carbon::parse($location->created_at)->diffForHumans() }}</td>
+                        <td class="text-sm text-gray-600" data-col="lat">{{ $location->latitude }}</td>
+                        <td class="text-sm text-gray-600" data-col="lng">{{ $location->longitude }}</td>
+                        <td data-col="badge">
+                            @if($isStale)
+                                <x-badge variant="warning">STALE</x-badge>
+                            @else
+                                <x-badge variant="success">LIVE</x-badge>
+                            @endif
+                        </td>
+                        <td class="text-sm text-gray-500" data-col="time">{{ $recordedAt ? \Carbon\Carbon::parse($recordedAt)->diffForHumans() : '-' }}</td>
                         <td>
                             <a href="{{ route('pkl-supervisor.locations.show', $location->student_id) }}">
                                 <x-button variant="ghost" size="sm">Detail</x-button>
@@ -60,13 +69,14 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="5">
+                        <td colspan="6">
                             <x-empty-state title="Tidak ada data" description="Belum ada siswa yang mengirim lokasi GPS." />
                         </td>
                     </tr>
                 @endforelse
             </tbody>
         </x-table>
+        </div>
     </x-card>
 
     {{-- Alerts for students outside radius --}}
@@ -93,4 +103,91 @@
         </x-card>
     @endif
 </div>
+
+@push('scripts')
+<script>
+function supervisorLocations() {
+    return {
+        realtime: false,
+        fallbackTimer: null,
+
+        init() {
+            this.refreshStaleBadges();
+            setInterval(() => this.refreshStaleBadges(), 15000);
+            // Beri waktu Echo terinisialisasi (app.js initEcho async).
+            setTimeout(() => this.connect(), 1500);
+            window.addEventListener('echo:connected', () => this.connect());
+            window.addEventListener('echo:disconnected', () => this.startFallback());
+        },
+
+        channels() {
+            return [...document.querySelectorAll('[data-channel]')].map(el => el.dataset.channel).filter(Boolean);
+        },
+
+        connect() {
+            if (!window.Echo) {
+                this.startFallback();
+                return;
+            }
+            this.realtime = true;
+            if (this.fallbackTimer) {
+                clearInterval(this.fallbackTimer);
+                this.fallbackTimer = null;
+            }
+            const seen = new Set();
+            this.channels().forEach((key) => {
+                if (seen.has(key)) return;
+                seen.add(key);
+                try {
+                    window.Echo.channel(`pkl.student.${key}`)
+                        .listen('.pkl.location.updated', (e) => this.applyUpdate(key, e));
+                } catch (err) {
+                    console.warn('[pkl] gagal subscribe', key, err);
+                }
+            });
+        },
+
+        applyUpdate(key, e) {
+            const row = document.querySelector(`[data-loc-row="${CSS.escape(key)}"]`);
+            if (!row) return;
+            const lat = row.querySelector('[data-col="lat"]');
+            const lng = row.querySelector('[data-col="lng"]');
+            const time = row.querySelector('[data-col="time"]');
+            const badge = row.querySelector('[data-col="badge"]');
+            if (lat) lat.textContent = e.latitude;
+            if (lng) lng.textContent = e.longitude;
+            if (time) time.textContent = 'baru saja';
+            row.dataset.recordedAt = e.recorded_at || '';
+            if (badge) badge.innerHTML = '<span class="md-badge md-badge-success">LIVE</span>';
+            row.classList.add('bg-green-50');
+            setTimeout(() => row.classList.remove('bg-green-50'), 2000);
+        },
+
+        refreshStaleBadges() {
+            const now = Date.now();
+            document.querySelectorAll('[data-loc-row]').forEach((row) => {
+                const raw = row.dataset.recordedAt;
+                if (!raw) return;
+                const ts = new Date(raw.replace(' ', 'T')).getTime();
+                if (Number.isNaN(ts)) return;
+                const stale = (now - ts) > 120000;
+                const badge = row.querySelector('[data-col="badge"]');
+                if (badge) {
+                    badge.innerHTML = stale
+                        ? '<span class="md-badge md-badge-warning">STALE</span>'
+                        : '<span class="md-badge md-badge-success">LIVE</span>';
+                }
+            });
+        },
+
+        // Fallback: polling ringan tiap 30 detik (bukan agresif) bila Echo tak tersedia.
+        startFallback() {
+            if (window.Echo || this.fallbackTimer) return;
+            this.realtime = false;
+            this.fallbackTimer = setInterval(() => window.location.reload(), 30000);
+        }
+    };
+}
+</script>
+@endpush
 @endsection

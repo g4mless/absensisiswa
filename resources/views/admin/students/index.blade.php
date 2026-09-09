@@ -117,6 +117,7 @@
                         <th>NIS</th>
                         <th>Nama</th>
                         <th>Kelas</th>
+                        <th>Tempat PKL</th>
                         <th>Aksi</th>
                     </tr>
                 </thead>
@@ -131,6 +132,7 @@
                                 <p class="font-medium">{{ $student->name }}</p>
                             </td>
                             <td>{{ $student->class->name ?? '-' }}</td>
+                            <td>{{ $student->pkl->tempat_pkl ?? '-' }}</td>
                             <td>
                                 <div class="flex items-center gap-2">
                                     @if($student->is_pkl)
@@ -149,7 +151,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="5">
+                            <td colspan="6">
                                 <x-empty-state title="Tidak ada siswa ditemukan" description="Tidak ada siswa yang cocok dengan kriteria pencarian Anda." />
                             </td>
                         </tr>

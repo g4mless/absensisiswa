@@ -68,7 +68,7 @@
 
                 @if(($assignedStudents ?? collect())->count() > 0)
                     <div class="mt-4">
-                        <a href="{{ route('pkl-supervisor.students.index') }}" class="text-sm font-medium text-primary-600 hover:text-primary-500">
+                        <a href="{{ route('pkl-supervisor.students') }}" class="text-sm font-medium text-primary-600 hover:text-primary-500">
                             Lihat Semua Siswa &rarr;
                         </a>
                     </div>

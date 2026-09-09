@@ -16,7 +16,13 @@
             @csrf
             <div class="space-y-4">
                 <x-select label="Tingkat" name="grade" :options="['X' => 'X', 'XI' => 'XI', 'XII' => 'XII']" :error="$errors->first('grade')" value="{{ old('grade') }}" placeholder="Pilih tingkat" />
-                <x-select label="Jurusan" name="major_id" :options="$majors->pluck('name', 'id')->toArray()" :error="$errors->first('major_id')" value="{{ old('major_id') }}" placeholder="Pilih jurusan" />
+                <div class="space-y-1.5">
+                    <div class="flex items-center justify-between">
+                        <label for="major_id" class="md-label">Jurusan</label>
+                        <button type="button" x-data="" x-on:click="$dispatch('open-modal', 'add-major')" class="text-xs font-medium text-primary-600 hover:text-primary-500 hover:underline">+ Tambah Jurusan</button>
+                    </div>
+                    <x-select name="major_id" :options="$majors->pluck('name', 'id')->toArray()" :error="$errors->first('major_id')" value="{{ old('major_id') }}" placeholder="Pilih jurusan" />
+                </div>
                 <x-input label="Rombel" name="section" :error="$errors->first('section')" value="{{ old('section') }}" placeholder="contoh: 1" />
             </div>
             <div class="flex items-center gap-3 mt-6">
@@ -28,4 +34,6 @@
         </form>
     </x-card>
 </div>
+
+@include('admin.classes._major-quick-add')
 @endsection

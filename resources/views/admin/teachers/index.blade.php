@@ -133,7 +133,6 @@
                         <th>NIP</th>
                         <th>Nama</th>
                         <th>Mata Pelajaran</th>
-                        <th>Kepala Jurusan</th>
                         <th>Aksi</th>
                     </tr>
                 </thead>
@@ -155,13 +154,6 @@
                                     </div>
                                 </td>
                                 <td>
-                                    @if($teacher->programHead)
-                                        <x-badge variant="warning">{{ $teacher->programHead->major->name ?? '-' }}</x-badge>
-                                    @else
-                                        <span class="text-gray-400">-</span>
-                                    @endif
-                                </td>
-                                <td>
                                     <div class="flex items-center gap-2">
                                         <a href="{{ route('admin.teachers.edit', $teacher) }}">
                                             <x-button variant="ghost" size="sm">Edit</x-button>
@@ -176,7 +168,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="6">
+                                <td colspan="5">
                                 <x-empty-state title="Tidak ada guru ditemukan" description="Tidak ada guru yang cocok dengan kriteria pencarian Anda." />
                             </td>
                         </tr>

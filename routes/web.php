@@ -8,9 +8,9 @@ use App\Http\Controllers\AdminTeacherController;
 use App\Http\Controllers\ClassController;
 use App\Http\Controllers\SubjectController;
 use App\Http\Controllers\TeacherSubjectController;
-use App\Http\Controllers\ProgramHeadController;
 use App\Http\Controllers\PklSupervisorController;
 use App\Http\Controllers\ScheduleController;
+use App\Http\Controllers\MajorController;
 use App\Http\Controllers\SchoolLocationController;
 use App\Http\Controllers\AdminAttendanceController;
 use App\Http\Controllers\AttendanceSettingController;
@@ -47,6 +47,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
     Route::post('teachers/import/sheets', [AdminTeacherController::class, 'importSheets'])->name('teachers.import.sheets');
     Route::resource('teachers', AdminTeacherController::class);
     Route::resource('classes', ClassController::class);
+    Route::resource('majors', MajorController::class);
     Route::post('classes/bulk-destroy', [ClassController::class, 'bulkDestroy'])->name('classes.bulk-destroy');
     Route::post('classes/all-destroy', [ClassController::class, 'allDestroy'])->name('classes.all-destroy');
     Route::resource('subjects', SubjectController::class);
@@ -55,7 +56,6 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
     Route::resource('teacher-subjects', TeacherSubjectController::class)->only(['index', 'create', 'store', 'edit', 'update', 'destroy']);
     Route::post('teacher-subjects/bulk-destroy', [TeacherSubjectController::class, 'bulkDestroy'])->name('teacher-subjects.bulk-destroy');
     Route::post('teacher-subjects/all-destroy', [TeacherSubjectController::class, 'allDestroy'])->name('teacher-subjects.all-destroy');
-    Route::resource('program-heads', ProgramHeadController::class)->only(['index', 'create', 'store', 'destroy']);
     Route::resource('pkl-supervisors', PklSupervisorController::class)->only(['index', 'create', 'store', 'edit', 'update', 'destroy']);
     Route::post('pkl-supervisors/import', [PklSupervisorController::class, 'import'])->name('pkl-supervisors.import');
     Route::get('pkl-supervisors/export', [PklSupervisorController::class, 'export'])->name('pkl-supervisors.export');

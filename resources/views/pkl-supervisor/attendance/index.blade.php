@@ -13,7 +13,7 @@
 
     {{-- Filters --}}
     <x-card>
-        <form method="GET" action="{{ route('pkl-supervisor.attendance.index') }}" class="flex flex-col gap-4 sm:flex-row sm:items-end">
+        <form method="GET" action="{{ route('pkl-supervisor.attendance') }}" class="flex flex-col gap-4 sm:flex-row sm:items-end">
             <div class="flex-1">
                 <x-input label="Dari Tanggal" name="start_date" type="date" :value="request('start_date')" />
             </div>
@@ -26,7 +26,7 @@
             <div class="flex gap-2">
                 <x-button type="submit" variant="primary">Filter</x-button>
                 @if(request('start_date') || request('end_date') || request('student_id'))
-                    <a href="{{ route('pkl-supervisor.attendance.index') }}">
+                    <a href="{{ route('pkl-supervisor.attendance') }}">
                         <x-button variant="ghost">Reset</x-button>
                     </a>
                 @endif

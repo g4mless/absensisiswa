@@ -6,6 +6,8 @@ use App\Exports\StudentExport;
 use App\Imports\StudentMultiSheetImport;
 use App\Models\ClassModel;
 use App\Models\Student;
+use App\Models\StudentPkl;
+use App\Models\Teacher;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -16,7 +18,7 @@ class AdminStudentController extends Controller
 {
     public function index(Request $request)
     {
-        $students = Student::with(['user', 'class'])
+        $students = Student::with(['user', 'class', 'pkl.pembimbing.user'])
             ->when($request->filled('search'), fn ($query) => $query
                 ->where('nis', 'like', '%'.$request->input('search').'%')
                 ->orWhereHas('user', fn ($user) => $user->where('name', 'like', '%'.$request->input('search').'%')))
@@ -31,8 +33,9 @@ class AdminStudentController extends Controller
     public function create()
     {
         $classes = ClassModel::with('major')->orderBy('grade')->orderBy('major_id')->orderBy('section')->get();
+        $teachers = Teacher::with('user')->orderBy('nip')->get();
 
-        return view('admin.students.create', compact('classes'));
+        return view('admin.students.create', compact('classes', 'teachers'));
     }
 
     public function store(Request $request)
@@ -44,24 +47,42 @@ class AdminStudentController extends Controller
             'phone' => ['nullable', 'string', 'max:30'],
             'address' => ['nullable', 'string', 'max:500'],
             'is_pkl' => ['nullable', 'boolean'],
+            'tempat_pkl' => ['nullable', 'string', 'max:255'],
+            'pembimbing_id' => ['nullable', 'exists:teachers,id'],
+            'pkl_start_date' => ['nullable', 'date'],
+            'pkl_end_date' => ['nullable', 'date', 'after_or_equal:pkl_start_date'],
+            'pkl_status' => ['nullable', Rule::in(['PLANNED', 'ACTIVE', 'COMPLETED', 'CANCELLED'])],
         ]);
 
-        DB::transaction(function () use ($data) {
+        DB::transaction(function () use ($data, $request) {
+            $isPkl = $request->boolean('is_pkl');
             $user = User::create([
                 'name' => $data['name'],
                 'username' => $data['name'].'-'.$data['nis'],
-                'role' => ! empty($data['is_pkl']) ? 'siswa_pkl' : 'siswa',
+                'role' => $isPkl ? 'siswa_pkl' : 'siswa',
                 'password' => $data['nis'],
             ]);
 
-            Student::create([
+            $student = Student::create([
                 'user_id' => $user->id,
                 'nis' => $data['nis'],
                 'class_id' => $data['class_id'],
                 'phone' => $data['phone'] ?? null,
                 'address' => $data['address'] ?? null,
-                'is_pkl' => ! empty($data['is_pkl']),
+                'is_pkl' => $isPkl,
             ]);
+
+            // Detail penempatan PKL (pengganti menu pkl-placements yang dihapus).
+            if ($isPkl && ! empty($data['tempat_pkl'])) {
+                StudentPkl::create([
+                    'student_id' => $student->id,
+                    'tempat_pkl' => $data['tempat_pkl'],
+                    'pembimbing_id' => $data['pembimbing_id'] ?? null,
+                    'start_date' => $data['pkl_start_date'] ?? null,
+                    'end_date' => $data['pkl_end_date'] ?? null,
+                    'status' => $data['pkl_status'] ?? 'ACTIVE',
+                ]);
+            }
         });
 
         return redirect()->route('admin.students.index')
@@ -77,10 +98,11 @@ class AdminStudentController extends Controller
 
     public function edit($id)
     {
-        $student = Student::findOrFail($id);
+        $student = Student::with('pkl')->findOrFail($id);
         $classes = ClassModel::with('major')->orderBy('grade')->orderBy('major_id')->orderBy('section')->get();
+        $teachers = Teacher::with('user')->orderBy('nip')->get();
 
-        return view('admin.students.edit', compact('student', 'classes'));
+        return view('admin.students.edit', compact('student', 'classes', 'teachers'));
     }
 
     public function update(Request $request, $id)
@@ -93,6 +115,11 @@ class AdminStudentController extends Controller
             'phone' => ['nullable', 'string', 'max:30'],
             'address' => ['nullable', 'string', 'max:500'],
             'is_pkl' => ['nullable', 'boolean'],
+            'tempat_pkl' => ['nullable', 'string', 'max:255'],
+            'pembimbing_id' => ['nullable', 'exists:teachers,id'],
+            'pkl_start_date' => ['nullable', 'date'],
+            'pkl_end_date' => ['nullable', 'date', 'after_or_equal:pkl_start_date'],
+            'pkl_status' => ['nullable', Rule::in(['PLANNED', 'ACTIVE', 'COMPLETED', 'CANCELLED'])],
         ]);
         DB::transaction(function () use ($student, $data, $request) {
             $isPkl = $request->boolean('is_pkl');
@@ -105,6 +132,22 @@ class AdminStudentController extends Controller
                 'phone' => $data['phone'] ?? null, 'address' => $data['address'] ?? null,
                 'is_pkl' => $isPkl,
             ]);
+
+            // Detail penempatan PKL (pengganti menu pkl-placements yang dihapus).
+            if ($isPkl && ! empty($data['tempat_pkl'])) {
+                StudentPkl::updateOrCreate(
+                    ['student_id' => $student->id],
+                    [
+                        'tempat_pkl' => $data['tempat_pkl'],
+                        'pembimbing_id' => $data['pembimbing_id'] ?? null,
+                        'start_date' => $data['pkl_start_date'] ?? null,
+                        'end_date' => $data['pkl_end_date'] ?? null,
+                        'status' => $data['pkl_status'] ?? 'ACTIVE',
+                    ]
+                );
+            } elseif (! $isPkl) {
+                StudentPkl::where('student_id', $student->id)->delete();
+            }
         });
         return redirect()->route('admin.students.index');
     }

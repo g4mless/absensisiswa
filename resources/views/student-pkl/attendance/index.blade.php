@@ -25,8 +25,13 @@
                         </svg>
                     </div>
                     <div>
-                        <p class="text-sm font-medium" :class="gpsReady ? 'text-green-700' : (gpsError ? 'text-red-700' : 'text-yellow-700')" x-text="gpsStatusText"></p>
-                        <p class="text-xs text-gray-500" x-show="latitude && longitude" x-text="'Lat: ' + latitude + ', Lng: ' + longitude"></p>
+                        <p class="text-base font-medium" :class="gpsReady && !gpsStale ? 'text-green-700' : (gpsError ? 'text-red-700' : 'text-yellow-700')" x-text="gpsStatusText"></p>
+                        <p class="text-sm text-gray-500" x-show="latitude && longitude" x-text="'Lat: ' + latitude + ', Lng: ' + longitude"></p>
+                        <p class="mt-1" x-show="accuracy" x-text="'Akurasi ±' + Math.round(accuracy) + ' m'"></p>
+                        <div class="mt-1" x-show="gpsReady">
+                            <span x-show="!gpsStale" class="md-badge md-badge-success">GPS LIVE</span>
+                            <span x-show="gpsStale" class="md-badge md-badge-warning">GPS STALE &gt; 2 mnt</span>
+                        </div>
                     </div>
                 </div>
                 @if($gpsAccuracy ?? null)
@@ -63,14 +68,14 @@
 
                     @if(!($todayAttendance->check_out_time))
                         <div x-show="statusMessage" x-transition class="w-full max-w-md">
-                            <x-alert :variant="statusType" x-text="statusMessage" dismissible />
+                            <x-alert variant="info" x-text="statusMessage" dismissible />
                         </div>
 
                         <button
                             type="button"
                             @click="checkOut()"
                             :disabled="loading || !gpsReady"
-                            class="inline-flex items-center gap-2 rounded-xl bg-red-600 px-8 py-4 text-lg font-semibold text-white shadow-lg shadow-red-200 transition-all hover:bg-red-700 hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
+                            class="inline-flex min-h-[48px] items-center justify-center gap-2 rounded-xl bg-red-600 px-8 py-4 text-lg font-semibold text-white shadow-lg shadow-red-200 transition-all hover:bg-red-700 hover:shadow-xl disabled:cursor-not-allowed disabled:opacity-50"
                         >
                             <template x-if="loading">
                                 <svg class="h-5 w-5 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -107,14 +112,14 @@
                     @endif
 
                     <div x-show="statusMessage" x-transition class="w-full max-w-md">
-                        <x-alert :variant="statusType" x-text="statusMessage" dismissible />
+                        <x-alert variant="info" x-text="statusMessage" dismissible />
                     </div>
 
                     <button
                         type="button"
                         @click="checkIn()"
                         :disabled="loading || !gpsReady"
-                        class="inline-flex items-center gap-2 rounded-xl bg-primary-600 px-8 py-4 text-lg font-semibold text-white shadow-lg shadow-primary-200 transition-all hover:bg-primary-700 hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
+                        class="inline-flex min-h-[48px] items-center justify-center gap-2 rounded-xl bg-primary-600 px-8 py-4 text-lg font-semibold text-white shadow-lg shadow-primary-200 transition-all hover:bg-primary-700 hover:shadow-xl disabled:cursor-not-allowed disabled:opacity-50"
                     >
                         <template x-if="loading">
                             <svg class="h-5 w-5 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -146,35 +151,49 @@ function pklAttendance() {
         accuracy: null,
         gpsReady: false,
         gpsError: false,
+        gpsStale: false,
+        lastGpsAt: null,
+        watchId: null,
         gpsStatusText: 'Mendapatkan lokasi...',
         loading: false,
         statusMessage: '',
         statusType: 'info',
 
         init() {
-            this.getLocation();
+            this.watchGps();
+            // Tandai stale bila posisi terakhir berumur > 2 menit (PRD pasal 13).
+            setInterval(() => {
+                this.gpsStale = this.lastGpsAt ? (Date.now() - this.lastGpsAt > 120000) : false;
+                if (this.gpsStale && this.gpsReady) {
+                    this.gpsStatusText = 'GPS basi (> 2 menit). Menunggu sinyal lokasi...';
+                }
+            }, 10000);
         },
 
-        getLocation() {
+        watchGps() {
             if (!navigator.geolocation) {
                 this.gpsError = true;
                 this.gpsStatusText = 'Geolocation tidak didukung browser';
                 return;
             }
 
-            navigator.geolocation.getCurrentPosition(
+            navigator.geolocation.watchPosition(
                 (position) => {
                     this.latitude = position.coords.latitude.toFixed(6);
                     this.longitude = position.coords.longitude.toFixed(6);
                     this.accuracy = position.coords.accuracy;
                     this.gpsReady = true;
+                    this.gpsError = false;
+                    this.gpsStale = false;
+                    this.lastGpsAt = Date.now();
                     this.gpsStatusText = 'GPS Aktif - Siap check in';
                 },
                 (error) => {
                     this.gpsError = true;
+                    this.gpsReady = false;
                     this.gpsStatusText = 'GPS tidak aktif. Aktifkan lokasi di perangkat Anda.';
                 },
-                { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+                { enableHighAccuracy: true, timeout: 10000, maximumAge: 5000 }
             );
         },
 
@@ -185,7 +204,7 @@ function pklAttendance() {
             this.statusMessage = '';
 
             try {
-                const response = await fetch('{{ route("student-pkl.attendance.store") }}', {
+                const response = await fetch('{{ route("student-pkl.attendance.checkin") }}', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -195,6 +214,7 @@ function pklAttendance() {
                     body: JSON.stringify({
                         latitude: this.latitude,
                         longitude: this.longitude,
+                        accuracy: this.accuracy,
                     }),
                 });
 
@@ -233,6 +253,7 @@ function pklAttendance() {
                     body: JSON.stringify({
                         latitude: this.latitude,
                         longitude: this.longitude,
+                        accuracy: this.accuracy,
                     }),
                 });
 

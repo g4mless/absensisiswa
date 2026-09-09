@@ -15,7 +15,7 @@
 
     {{-- Search --}}
     <x-card>
-        <form method="GET" action="{{ route('pkl-supervisor.students.index') }}" class="flex flex-col gap-4 sm:flex-row sm:items-end">
+        <form method="GET" action="{{ route('pkl-supervisor.students') }}" class="flex flex-col gap-4 sm:flex-row sm:items-end">
             <div class="flex-1">
                 <x-search-input name="search" placeholder="Cari nama atau NIS siswa..." value="{{ request('search') }}" />
             </div>
@@ -48,7 +48,7 @@
                         <td class="text-sm text-gray-600">{{ $student->nis ?? '-' }}</td>
                         <td class="text-sm text-gray-600">{{ $student->pkl->company ?? '-' }}</td>
                         <td>
-                            @if(($student->pkl->status ?? null) === 'active')
+                            @if(strtoupper($student->pkl->status ?? '') === 'ACTIVE')
                                 <x-badge variant="success">Aktif</x-badge>
                             @else
                                 <x-badge variant="neutral">Selesai</x-badge>

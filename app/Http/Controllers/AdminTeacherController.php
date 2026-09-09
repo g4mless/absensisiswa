@@ -18,7 +18,7 @@ class AdminTeacherController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Teacher::with(['user', 'subjects', 'programHead.major']);
+        $query = Teacher::with(['user', 'subjects']);
 
         if ($search = trim($request->input('search', ''))) {
             $query->where(function ($query) use ($search) {
