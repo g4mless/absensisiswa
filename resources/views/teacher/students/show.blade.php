@@ -9,7 +9,7 @@
     <div class="flex items-center gap-2 mb-1">
         <a href="{{ route('teacher.classes') }}" class="text-sm text-gray-500 hover:text-primary-600 transition-colors">Kelas</a>
         <svg class="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5"/></svg>
-        <a href="{{ route('teacher.classes.show', $student->classroom->id ?? 0) }}" class="text-sm text-gray-500 hover:text-primary-600 transition-colors">{{ $student->classroom->name ?? '-' }}</a>
+        <a href="{{ route('teacher.classes.show', $student->class->id ?? $student->classroom->id ?? 0) }}" class="text-sm text-gray-500 hover:text-primary-600 transition-colors">{{ $student->class->name ?? $student->classroom->name ?? '-' }}</a>
         <svg class="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5"/></svg>
         <span class="text-sm font-medium text-gray-900">{{ $student->name ?? '-' }}</span>
     </div>
@@ -19,7 +19,7 @@
             <x-card>
                 <div class="text-center">
                     <h2 class="text-lg font-bold text-gray-900">{{ $student->name ?? '-' }}</h2>
-                    <p class="text-sm text-gray-500">{{ $student->classroom->name ?? '-' }}</p>
+                    <p class="text-sm text-gray-500">{{ $student->class->name ?? $student->classroom->name ?? '-' }}</p>
                 </div>
 
                 <div class="mt-6 space-y-3">
@@ -33,11 +33,11 @@
                     </div>
                     <div class="flex items-center justify-between rounded-lg bg-gray-50 px-4 py-2.5">
                         <span class="text-sm text-gray-500">Kelas</span>
-                        <span class="text-sm font-semibold text-gray-900">{{ $student->classroom->name ?? '-' }}</span>
+                        <span class="text-sm font-semibold text-gray-900">{{ $student->class->name ?? $student->classroom->name ?? '-' }}</span>
                     </div>
                     <div class="flex items-center justify-between rounded-lg bg-gray-50 px-4 py-2.5">
                         <span class="text-sm text-gray-500">Jenis Kelamin</span>
-                        <span class="text-sm font-semibold text-gray-900">{{ $student->gender === 'M' ? 'Laki-laki' : 'Perempuan' }}</span>
+                        <span class="text-sm font-semibold text-gray-900">{{ ($student->gender ?? null) === 'M' ? 'Laki-laki' : (($student->gender ?? null) === 'F' ? 'Perempuan' : '-') }}</span>
                     </div>
                     @if($student->phone)
                     <div class="flex items-center justify-between rounded-lg bg-gray-50 px-4 py-2.5">
@@ -101,7 +101,7 @@
                             <tr>
                                 <td class="text-sm">{{ $record->date ? \Carbon\Carbon::parse($record->date)->format('d M Y') : '-' }}</td>
                                 <td class="text-sm">{{ $record->session->subject->name ?? '-' }}</td>
-                                <td class="text-sm">{{ $record->session->classroom->name ?? '-' }}</td>
+                                <td class="text-sm">{{ $record->session->class->name ?? $record->session->classroom->name ?? '-' }}</td>
                                 <td class="text-center">
                                     <x-badge variant="{{ match($record->status) { 'HADIR' => 'success', 'IZIN' => 'warning', 'SAKIT' => 'info', 'ALFA' => 'danger', default => 'neutral' } }}">
                                         {{ $record->status }}
@@ -124,7 +124,7 @@
                 <x-slot name="header">Surat Izin</x-slot>
 
                 @forelse($student->excuses ?? [] as $excuse)
-                    <div class="flex items-start gap-4 rounded-xl border border-gray-100 p-4 {{ !$excuse->is_read ? 'bg-primary-50/50 border-primary-200' : '' }}">
+                    <div class="flex items-start gap-4 rounded-xl border border-gray-100 p-4 {{ !($excuse->is_read ?? true) ? 'bg-primary-50/50 border-primary-200' : '' }}">
                         <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg {{ match($excuse->status) { 'pending' => 'bg-yellow-100 text-yellow-700', 'approved' => 'bg-green-100 text-green-700', 'rejected' => 'bg-red-100 text-red-700', default => 'bg-gray-100 text-gray-700' } }}">
                             <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z"/></svg>
                         </div>
@@ -136,8 +136,8 @@
                                 </x-badge>
                             </div>
                             <p class="text-xs text-gray-500 mt-0.5">{{ $excuse->date ? \Carbon\Carbon::parse($excuse->date)->format('d M Y') : '-' }}</p>
-                            @if($excuse->description)
-                                <p class="text-sm text-gray-600 mt-2">{{ Str::limit($excuse->description, 120) }}</p>
+                            @if($excuse->description ?? $excuse->reason ?? null)
+                                <p class="text-sm text-gray-600 mt-2">{{ Str::limit($excuse->description ?? $excuse->reason, 120) }}</p>
                             @endif
                             @if($excuse->file_path)
                                 <a href="{{ asset('storage/' . $excuse->file_path) }}" target="_blank" class="mt-2 inline-flex items-center gap-1 text-xs text-primary-600 hover:text-primary-700">

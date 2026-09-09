@@ -59,7 +59,7 @@
                         <td>
                             <span class="text-sm font-medium text-gray-900">{{ $excuse->student->name ?? '-' }}</span>
                         </td>
-                        <td class="text-sm text-gray-600">{{ $excuse->student->classroom->name ?? '-' }}</td>
+                        <td class="text-sm text-gray-600">{{ $excuse->student->class->name ?? $excuse->student->classroom->name ?? '-' }}</td>
                         <td class="text-sm text-gray-600">{{ $excuse->date ? \Carbon\Carbon::parse($excuse->date)->format('d M Y') : '-' }}</td>
                         <td class="text-sm text-gray-600">{{ $excuse->type ?? '-' }}</td>
                         <td class="text-center">

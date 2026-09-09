@@ -44,7 +44,7 @@
                                     @if($session)
                                         <div class="rounded-lg border border-primary-200 bg-white p-2.5 shadow-sm hover:shadow-md transition-shadow">
                                             <p class="text-xs font-bold text-primary-700">{{ $session->subject->name ?? '-' }}</p>
-                                            <p class="text-[11px] text-gray-600 mt-0.5">{{ $session->classroom->name ?? '-' }}</p>
+                                            <p class="text-[11px] text-gray-600 mt-0.5">{{ $session->class->name ?? $session->classroom->name ?? '-' }}</p>
                                             <p class="text-[11px] text-gray-400 mt-0.5">R. {{ $session->room ?? '-' }}</p>
                                         </div>
                                     @else

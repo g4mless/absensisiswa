@@ -9,22 +9,36 @@
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
             <div class="flex items-center gap-2 mb-1">
-                <a href="{{ route('teacher.attendance') }}" class="text-sm text-gray-500 hover:text-primary-600 transition-colors">Absensi</a>
+                <a href="{{ route('teacher.attendance', ['date' => $session->date ?? request('date', date('Y-m-d'))]) }}" class="text-sm text-gray-500 hover:text-primary-600 transition-colors">Absensi</a>
                 <svg class="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5"/></svg>
                 <span class="text-sm font-medium text-gray-900">Sesi</span>
             </div>
             <h1 class="text-2xl font-bold text-gray-900">{{ $session->subject->name ?? '-' }}</h1>
-            <p class="text-gray-500">{{ $session->classroom->name ?? '-' }} &middot; {{ $session->start_time }} - {{ $session->end_time }}</p>
+            <p class="text-gray-500">{{ $session->class->name ?? $session->classroom->name ?? '-' }} &middot; {{ $session->start_time }} - {{ $session->end_time }}</p>
+            @php
+                $attendanceStats = ['HADIR' => 0, 'IZIN' => 0, 'SAKIT' => 0, 'ALFA' => 0];
+                foreach($session->students ?? [] as $s) {
+                    $status = $s->pivot->status ?? 'ALFA';
+                    $attendanceStats[$status] = ($attendanceStats[$status] ?? 0) + 1;
+                }
+            @endphp
+            <div class="mt-3 flex flex-wrap gap-2">
+                <span class="inline-flex items-center gap-1.5 rounded-lg bg-green-50 px-3 py-1.5 text-xs font-semibold text-green-700">Hadir: <span id="summary-hadir">{{ $attendanceStats['HADIR'] }}</span></span>
+                <span class="inline-flex items-center gap-1.5 rounded-lg bg-yellow-50 px-3 py-1.5 text-xs font-semibold text-yellow-700">Izin: <span id="summary-izin">{{ $attendanceStats['IZIN'] }}</span></span>
+                <span class="inline-flex items-center gap-1.5 rounded-lg bg-blue-50 px-3 py-1.5 text-xs font-semibold text-blue-700">Sakit: <span id="summary-sakit">{{ $attendanceStats['SAKIT'] }}</span></span>
+                <span class="inline-flex items-center gap-1.5 rounded-lg bg-red-50 px-3 py-1.5 text-xs font-semibold text-red-700">Alfa: <span id="summary-alfa">{{ $attendanceStats['ALFA'] }}</span></span>
+            </div>
         </div>
         <div class="flex gap-2">
-            @if($session->attendance_completed)
+            <span id="badge-done" class="{{ $session->attendance_completed ? '' : 'hidden' }}">
                 <x-badge variant="success" class="text-sm px-3 py-1.5">
                     <svg class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/></svg>
                     Absensi Selesai
                 </x-badge>
-            @else
+            </span>
+            <span id="badge-pending" class="{{ $session->attendance_completed ? 'hidden' : '' }}">
                 <x-badge variant="warning" class="text-sm px-3 py-1.5">Belum Diisi</x-badge>
-            @endif
+            </span>
         </div>
     </div>
 
@@ -38,14 +52,17 @@
         </x-alert>
     @endif
 
-    <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
-        <div class="lg:col-span-3">
+    <div>
+        <div>
             <x-card>
                 <x-slot name="header">Daftar Kehadiran</x-slot>
                 <x-slot name="subtitle">{{ count($session->students ?? []) }} siswa</x-slot>
 
-                <form method="POST" action="{{ route('teacher.attendance.update', $session->id) }}">
+                <div id="attendance-toast" class="hidden mb-4 rounded-lg bg-green-50 border border-green-200 px-4 py-2.5 text-sm font-medium text-green-700"></div>
+
+                <form id="attendance-form" method="POST" action="{{ route('teacher.attendance.update', $session->id) }}" enctype="multipart/form-data" x-data="" autocomplete="off">
                     @csrf
+                    <input type="hidden" name="date" value="{{ $session->date ?? request('date', date('Y-m-d')) }}" />
 
                     <div class="mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                         <div class="flex gap-2">
@@ -76,7 +93,8 @@
                             <tbody>
                                 @forelse($session->students ?? [] as $index => $student)
                                     @php
-                                        $currentStatus = $student->pivot->status ?? 'HADIR';
+                                        $currentStatus = $student->pivot->status ?? 'ALFA';
+                                        $existingExcuse = $student->excuse_for_date ?? null;
                                     @endphp
                                     <tr>
                                         <td class="text-gray-500">{{ $index + 1 }}</td>
@@ -90,6 +108,7 @@
                                                             name="attendance[{{ $student->id }}]"
                                                             value="{{ $status }}"
                                                             {{ $currentStatus === $status ? 'checked' : '' }}
+                                                            x-on:change="if (['IZIN', 'SAKIT'].includes($event.target.value)) $dispatch('open-modal', 'excuse-{{ $student->id }}')"
                                                             class="h-4 w-4 border-gray-300 text-primary-600 focus:ring-primary-500" />
                                                         <span class="text-xs font-semibold {{ match($status) {
                                                             'HADIR' => 'text-green-600 group-hover:text-green-700',
@@ -101,6 +120,28 @@
                                                     </label>
                                                 @endforeach
                                             </div>
+                                            <x-modal name="excuse-{{ $student->id }}" maxWidth="md">
+                                                <x-slot name="header">Surat Izin/Sakit — {{ $student->name ?? '-' }}</x-slot>
+                                                <div class="space-y-4">
+                                                    <p class="text-xs text-gray-500">Status <span class="font-semibold" id="letter-status-{{ $student->id }}">Izin/Sakit</span> membutuhkan surat. Upload foto/scan surat (JPG, PNG, WebP, PDF, maks 5MB).</p>
+                                                    @if($existingExcuse?->file_path)
+                                                        <p class="text-xs text-gray-500">Surat saat ini: <a href="{{ asset('storage/' . $existingExcuse->file_path) }}" target="_blank" class="text-primary-600 hover:underline">Lihat</a> — upload baru untuk mengganti.</p>
+                                                    @endif
+                                                    <div>
+                                                        <label class="mb-1 block text-xs font-medium text-gray-700">Gambar Surat</label>
+                                                        <input type="file" name="excuse_file[{{ $student->id }}]" accept=".jpg,.jpeg,.png,.webp,.pdf" x-on:change="document.getElementById('letter-name-{{ $student->id }}').textContent = $event.target.files[0] ? 'Dipilih (ikut tersimpan saat Simpan Absensi): ' + $event.target.files[0].name : ''" class="block w-full text-sm text-gray-700 file:mr-3 file:rounded-lg file:border-0 file:bg-primary-50 file:px-3 file:py-2 file:text-xs file:font-semibold file:text-primary-700 hover:file:bg-primary-100" />
+                                                        <p id="letter-name-{{ $student->id }}" class="mt-1 text-[11px] text-gray-500"></p>
+                                                    </div>
+                                                    <div>
+                                                        <label class="mb-1 block text-xs font-medium text-gray-700">Keterangan (opsional)</label>
+                                                        <textarea name="excuse_reason[{{ $student->id }}]" rows="2" placeholder="Contoh: Sakit demam, ada surat dokter..." class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500">{{ old('excuse_reason.' . $student->id, $existingExcuse->reason ?? '') }}</textarea>
+                                                    </div>
+                                                </div>
+                                                <x-slot name="footer">
+                                                    <x-button variant="ghost" x-on:click="$dispatch('close-modal', 'excuse-{{ $student->id }}')">Nanti</x-button>
+                                                    <x-button type="button" variant="primary" x-on:click="$dispatch('close-modal', 'excuse-{{ $student->id }}')">Simpan Surat</x-button>
+                                                </x-slot>
+                                            </x-modal>
                                         </td>
                                     </tr>
                                 @empty
@@ -116,74 +157,98 @@
                 </form>
             </x-card>
         </div>
-
-        <div class="lg:col-span-1">
-            <x-card>
-                <x-slot name="header">Info Sesi</x-slot>
-                <div class="space-y-3">
-                    <div>
-                        <p class="text-xs text-gray-500">Mata Pelajaran</p>
-                        <p class="text-sm font-semibold text-gray-900">{{ $session->subject->name ?? '-' }}</p>
-                    </div>
-                    <div>
-                        <p class="text-xs text-gray-500">Kelas</p>
-                        <p class="text-sm font-semibold text-gray-900">{{ $session->classroom->name ?? '-' }}</p>
-                    </div>
-                    <div>
-                        <p class="text-xs text-gray-500">Ruangan</p>
-                        <p class="text-sm font-semibold text-gray-900">{{ $session->room ?? '-' }}</p>
-                    </div>
-                    <div>
-                        <p class="text-xs text-gray-500">Waktu</p>
-                        <p class="text-sm font-semibold text-gray-900">{{ $session->start_time }} - {{ $session->end_time }}</p>
-                    </div>
-                    <div>
-                        <p class="text-xs text-gray-500">Total Siswa</p>
-                        <p class="text-sm font-semibold text-gray-900">{{ count($session->students ?? []) }}</p>
-                    </div>
-
-                    @php
-                        $attendanceStats = ['HADIR' => 0, 'IZIN' => 0, 'SAKIT' => 0, 'ALFA' => 0];
-                        foreach($session->students ?? [] as $s) {
-                            $status = $s->pivot->status ?? 'HADIR';
-                            $attendanceStats[$status] = ($attendanceStats[$status] ?? 0) + 1;
-                        }
-                    @endphp
-
-                    <div class="pt-3 border-t border-gray-100">
-                        <p class="text-xs text-gray-500 mb-2">Ringkasan</p>
-                        <div class="grid grid-cols-2 gap-2">
-                            <div class="rounded-lg bg-green-50 p-2 text-center">
-                                <p class="text-lg font-bold text-green-700">{{ $attendanceStats['HADIR'] }}</p>
-                                <p class="text-[10px] text-green-600">Hadir</p>
-                            </div>
-                            <div class="rounded-lg bg-yellow-50 p-2 text-center">
-                                <p class="text-lg font-bold text-yellow-700">{{ $attendanceStats['IZIN'] }}</p>
-                                <p class="text-[10px] text-yellow-600">Izin</p>
-                            </div>
-                            <div class="rounded-lg bg-blue-50 p-2 text-center">
-                                <p class="text-lg font-bold text-blue-700">{{ $attendanceStats['SAKIT'] }}</p>
-                                <p class="text-[10px] text-blue-600">Sakit</p>
-                            </div>
-                            <div class="rounded-lg bg-red-50 p-2 text-center">
-                                <p class="text-lg font-bold text-red-700">{{ $attendanceStats['ALFA'] }}</p>
-                                <p class="text-[10px] text-red-600">Alfa</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </x-card>
-        </div>
     </div>
 </div>
 
 @push('scripts')
 <script>
+    window.__attendanceDirty = window.__attendanceDirty || new Set();
+
     function markAll(status) {
         document.querySelectorAll('input[type="radio"][value="' + status + '"]').forEach(radio => {
             radio.checked = true;
+            window.__attendanceDirty.add(radio.name);
         });
     }
+
+    // Polling realtime: refresh status kehadiran tiap 5 detik.
+    // Baris yang sudah disentuh guru (dirty) tidak ditimpa.
+    (function () {
+        const form = document.getElementById('attendance-form');
+        if (!form) return;
+
+        const statusUrl = "{{ route('teacher.attendance.status', ['sessionId' => $session->id, 'date' => $session->date ?? request('date', date('Y-m-d'))]) }}";
+        const names = @json(($session->students ?? collect())->mapWithKeys(fn ($s) => [(string) $s->id => ($s->name ?? '-')])->all());
+        const last = {};
+
+        form.querySelectorAll('input[type="radio"]:checked').forEach(radio => {
+            const match = radio.name.match(/^attendance\[(\d+)\]$/);
+            if (match) last[match[1]] = radio.value;
+        });
+
+        form.addEventListener('change', function (event) {
+            if (event.target.matches('input[type="radio"]')) {
+                window.__attendanceDirty.add(event.target.name);
+            }
+        });
+
+        let toastTimer = null;
+        function toast(message) {
+            const el = document.getElementById('attendance-toast');
+            if (!el) return;
+            el.textContent = message;
+            el.classList.remove('hidden');
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => el.classList.add('hidden'), 4000);
+        }
+
+        async function poll() {
+            if (document.hidden) return;
+            try {
+                const response = await fetch(statusUrl, {
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                });
+                if (!response.ok) return;
+                const data = await response.json();
+
+                ['hadir', 'izin', 'sakit', 'alfa'].forEach(key => {
+                    const el = document.getElementById('summary-' + key);
+                    if (el && data.summary && data.summary[key.toUpperCase()] !== undefined) {
+                        el.textContent = data.summary[key.toUpperCase()];
+                    }
+                });
+
+                const badgeDone = document.getElementById('badge-done');
+                const badgePending = document.getElementById('badge-pending');
+                if (badgeDone && badgePending && data.attendance_completed !== undefined) {
+                    badgeDone.classList.toggle('hidden', !data.attendance_completed);
+                    badgePending.classList.toggle('hidden', !!data.attendance_completed);
+                }
+
+                (data.students || []).forEach(student => {
+                    const id = String(student.id);
+                    const fieldName = 'attendance[' + id + ']';
+                    if (window.__attendanceDirty.has(fieldName)) return; // jangan timpa edit guru
+                    if (last[id] === student.status) return;
+                    const radio = form.querySelector('input[name="' + fieldName + '"][value="' + student.status + '"]');
+                    if (radio) {
+                        radio.checked = true;
+                        if (student.status === 'HADIR' && last[id] !== undefined && last[id] !== 'HADIR') {
+                            toast((names[id] || 'Siswa') + ' baru saja absen');
+                        }
+                        last[id] = student.status;
+                    }
+                });
+            } catch (error) {
+                // Abaikan galat jaringan; coba lagi pada interval berikutnya.
+            }
+        }
+
+        setInterval(poll, 5000);
+        document.addEventListener('visibilitychange', function () {
+            if (!document.hidden) poll();
+        });
+    })();
 </script>
 @endpush
 @endsection

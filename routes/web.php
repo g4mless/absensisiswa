@@ -83,6 +83,7 @@ Route::prefix('teacher')->name('teacher.')->middleware(['auth'])->group(function
     Route::get('/classes', [TeacherController::class, 'classes'])->name('classes');
     Route::get('/classes/{id}', [TeacherController::class, 'showClass'])->name('classes.show');
     Route::get('/attendance', [TeacherController::class, 'attendance'])->name('attendance');
+    Route::get('/attendance/{sessionId}/status', [TeacherController::class, 'attendanceStatus'])->name('attendance.status');
     Route::get('/attendance/{sessionId}', [TeacherController::class, 'showSession'])->name('attendance.show');
     Route::post('/attendance/{sessionId}', [TeacherController::class, 'updateSession'])->name('attendance.update');
     Route::get('/students/{id}', [TeacherController::class, 'showStudent'])->name('students.show');

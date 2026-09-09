@@ -45,7 +45,7 @@
                         </div>
                         <div class="rounded-lg bg-gray-50 px-4 py-3">
                             <p class="text-xs text-gray-500">Kelas</p>
-                            <p class="text-sm font-semibold text-gray-900 mt-0.5">{{ $excuse->student->classroom->name ?? '-' }}</p>
+                            <p class="text-sm font-semibold text-gray-900 mt-0.5">{{ $excuse->student->class->name ?? $excuse->student->classroom->name ?? '-' }}</p>
                         </div>
                         <div class="rounded-lg bg-gray-50 px-4 py-3">
                             <p class="text-xs text-gray-500">Tanggal Izin</p>
@@ -57,11 +57,11 @@
                         </div>
                     </div>
 
-                    @if($excuse->description)
+                    @if($excuse->reason ?? $excuse->description ?? null)
                     <div>
                         <p class="text-xs text-gray-500 mb-1">Keterangan</p>
                         <div class="rounded-lg border border-gray-200 bg-gray-50 p-4">
-                            <p class="text-sm text-gray-700">{{ $excuse->description }}</p>
+                            <p class="text-sm text-gray-700">{{ $excuse->reason ?? $excuse->description }}</p>
                         </div>
                     </div>
                     @endif
@@ -101,26 +101,20 @@
                 <x-slot name="header">Aksi</x-slot>
 
                 @if($excuse->status === 'pending')
-                    <form method="POST" action="{{ route('teacher.excuses.process', $excuse->id) }}">
-                        @csrf
-                        @method('PATCH')
-                        <input type="hidden" name="action" value="" x-ref="actionInput" />
-
-                        <div class="space-y-4">
-                            <x-textarea label="Alasan Keputusan" name="reason" :rows="3" placeholder="Masukkan alasan (opsional untuk persetujuan, wajib untuk penolakan)" />
-
-                            <div class="flex gap-2">
-                                <x-button type="submit" variant="success" class="flex-1" x-on:click="$refs.actionInput.value = 'approve'">
-                                    <svg class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/></svg>
+                    <div class="space-y-4">
+                        <form method="POST" action="{{ route('teacher.excuses.reject', $excuse->id) }}">
+                            @csrf
+                            <x-textarea label="Alasan Penolakan" name="reason" :rows="3" placeholder="Masukkan alasan penolakan (opsional)" />
+                            <div class="flex gap-2 mt-3">
+                                <button type="submit" formaction="{{ route('teacher.excuses.approve', $excuse->id) }}" class="flex-1 inline-flex items-center justify-center rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700">
                                     Setujui
-                                </x-button>
-                                <x-button type="submit" variant="danger" class="flex-1" x-on:click="$refs.actionInput.value = 'reject'">
-                                    <svg class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/></svg>
+                                </button>
+                                <x-button type="submit" variant="danger" class="flex-1">
                                     Tolak
                                 </x-button>
                             </div>
-                        </div>
-                    </form>
+                        </form>
+                    </div>
                 @else
                     <div class="text-center py-4">
                         <div class="mx-auto h-12 w-12 rounded-full {{ $excuse->status === 'approved' ? 'bg-green-100' : 'bg-red-100' }} flex items-center justify-center mb-3">
@@ -133,13 +127,13 @@
                         <p class="text-sm font-semibold {{ $excuse->status === 'approved' ? 'text-green-700' : 'text-red-700' }}">
                             Surat Izin {{ $excuse->status === 'approved' ? 'Disetujui' : 'Ditolak' }}
                         </p>
-                        @if($excuse->processed_at)
-                            <p class="text-xs text-gray-500 mt-1">{{ \Carbon\Carbon::parse($excuse->processed_at)->format('d M Y, H:i') }}</p>
+                        @if($excuse->updated_at && $excuse->status !== 'pending')
+                            <p class="text-xs text-gray-500 mt-1">{{ \Carbon\Carbon::parse($excuse->updated_at)->format('d M Y, H:i') }}</p>
                         @endif
-                        @if($excuse->reason)
+                        @if($excuse->reject_reason)
                             <div class="mt-3 rounded-lg bg-gray-50 p-3 text-left">
                                 <p class="text-xs text-gray-500 mb-1">Alasan</p>
-                                <p class="text-sm text-gray-700">{{ $excuse->reason }}</p>
+                                <p class="text-sm text-gray-700">{{ $excuse->reject_reason }}</p>
                             </div>
                         @endif
                     </div>
@@ -151,10 +145,10 @@
                             <span class="text-gray-500">Diajukan</span>
                             <span class="text-gray-900">{{ $excuse->created_at ? \Carbon\Carbon::parse($excuse->created_at)->format('d M Y, H:i') : '-' }}</span>
                         </div>
-                        @if($excuse->processed_at)
+                        @if($excuse->status !== 'pending')
                         <div class="flex items-center justify-between text-sm">
                             <span class="text-gray-500">Diproses</span>
-                            <span class="text-gray-900">{{ \Carbon\Carbon::parse($excuse->processed_at)->format('d M Y, H:i') }}</span>
+                            <span class="text-gray-900">{{ \Carbon\Carbon::parse($excuse->updated_at)->format('d M Y, H:i') }}</span>
                         </div>
                         @endif
                     </div>

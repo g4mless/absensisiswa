@@ -32,7 +32,7 @@
                             </div>
                             <div class="flex-1 min-w-0">
                                 <p class="text-sm font-semibold text-gray-900">{{ $session->subject->name ?? '-' }}</p>
-                                <p class="text-xs text-gray-500">{{ $session->classroom->name ?? '-' }} &middot; {{ $session->room ?? '-' }}</p>
+                                <p class="text-xs text-gray-500">{{ $session->class->name ?? $session->classroom->name ?? '-' }} &middot; {{ $session->room ?? '-' }}</p>
                             </div>
                             <x-badge variant="{{ $session->is_current ? 'success' : 'neutral' }}">
                                 {{ $session->is_current ? 'Berlangsung' : \Carbon\Carbon::parse($session->start_time)->format('H:i') . ' - ' . \Carbon\Carbon::parse($session->end_time)->format('H:i') }}
