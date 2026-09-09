@@ -15,6 +15,7 @@
     @if(!in_array(auth()->user()->role ?? '', ['siswa', 'siswa_pkl']))
         {{-- Mobile sidebar overlay --}}
         <div
+            x-cloak
             x-show="sidebarOpen"
             x-transition:enter="transition-opacity ease-linear duration-300"
             x-transition:enter-start="opacity-0"

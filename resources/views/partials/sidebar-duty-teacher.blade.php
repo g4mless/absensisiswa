@@ -1,7 +1,7 @@
 {{-- Guru Piket Sidebar --}}
 <aside
-    class="fixed inset-y-0 left-0 z-50 flex w-72 flex-col border-r border-gray-200 bg-white transition-transform duration-300 lg:translate-x-0"
-    :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'"
+    class="fixed inset-y-0 left-0 z-50 flex w-72 flex-col border-r border-gray-200 bg-white transition-transform duration-300 -translate-x-full lg:translate-x-0"
+    :class="sidebarOpen ? '!translate-x-0' : ''"
 >
     {{-- Logo --}}
     <div class="flex h-16 items-center gap-3 border-b border-gray-200 px-6">
